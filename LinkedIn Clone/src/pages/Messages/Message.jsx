@@ -5,7 +5,7 @@ import MainNav from "../../components/MainNav.jsx";
 import Card from "../../components/Card.jsx";
 import { useLocation, useNavigate } from "react-router-dom";
 import { getUser } from "../../utils/user.js";
-
+import axios from "axios";
 
 const socket = io("http://localhost:3000");
 
@@ -18,27 +18,36 @@ const Message = () => {
   const [messages, setMessages] = useState([]);
 
   const [receiverId, setReceiverId] = useState(null);
+  const [refresh, setRefresh] = useState(false);
 
-   const [profileUser, setProfileUser] = useState(null);
+  const [profileUser, setProfileUser] = useState(null);
   useEffect(() => {
-      const getProfileUser = async () => {
-        const data = await getUser(user?._id);
-        setProfileUser(data);
-      };
-  
-      getProfileUser();
-    }, [user?._id]);
+    const getProfileUser = async () => {
+      const data = await getUser(user?._id);
+      setProfileUser(data);
+    };
 
-useEffect(() => {
-  const queryParams = new URLSearchParams(location.search);
-  const id = queryParams.get("user");
-  setReceiverId(id);
-}, [location]);
+    getProfileUser();
+  }, [user?._id]);
 
+  useEffect(() => {
+    const queryParams = new URLSearchParams(location.search);
+    const id = queryParams.get("user");
+    setReceiverId(id);
+  }, [location]);
 
   useEffect(() => {
     socket.emit("join", user._id); // Join room on connect
   }, []);
+
+  const handleChangeConn = async (conn_id) => {
+    await axios.post("http://localhost:3000/messages/readMsg", {
+      user_id: user._id,
+      conn_id: conn_id,
+    });
+    setRefresh(!refresh);
+    navigate(`/messages?user=${conn_id}`);
+  };
 
   const handleSend = async () => {
     if (!message.trim()) return;
@@ -85,38 +94,52 @@ useEffect(() => {
     };
 
     fetchConnections();
-  }, []);
+  }, [refresh]);
 
   useEffect(() => {
-  const fetchReceiver = async () => {
-    try {
-      if (!receiverId || connections.find((c) => c._id === receiverId)) return;
+    const fetchReceiver = async () => {
+      try {
+        if (!receiverId || connections.find((c) => c._id === receiverId))
+          return;
 
-      const res = await fetch(`http://localhost:3000/users/${receiverId}`);
-      const data = await res.json();
-      setConnections((prev) => [...prev, data]);
-    } catch (err) {
-      console.error("Failed to fetch receiver user:", err);
-    }
-  };
+        const res = await fetch(`http://localhost:3000/users/${receiverId}`);
+        const data = await res.json();
+        setConnections((prev) => [...prev, data]);
+      } catch (err) {
+        console.error("Failed to fetch receiver user:", err);
+      }
+    };
 
-  fetchReceiver();
-}, [receiverId, connections]);
-
-
+    fetchReceiver();
+  }, [receiverId, connections]);
 
   useEffect(() => {
-  socket.on("chat message", (data) => {
-    if (
-      (data.sender === user._id && data.receiver === receiverId) ||
-      (data.sender === receiverId && data.receiver === user._id)
-    ) {
+  socket.on("chat message", async (data) => {
+    console.log("executed")
+    const isCurrentChatOpen =
+      (data.sender === receiverId && data.receiver === user._id) ||
+      (data.sender === user._id && data.receiver === receiverId);
+    console.log(isCurrentChatOpen)
+
+    if (isCurrentChatOpen) {
       setMessages((prev) => [...prev, data]);
+
+      // ✅ Mark the message as read immediately if user is viewing the chat
+      if (data.sender === receiverId && data.receiver === user._id) {
+        console.log("getting executed")
+        await axios.post("http://localhost:3000/messages/readMsg", {
+          user_id: user._id,
+          conn_id: receiverId,
+        });
+
+        setRefresh(!refresh)
+      }
     }
   });
 
   return () => socket.off("chat message");
 }, [receiverId]);
+
 
   useEffect(() => {
     const fetchMessages = async () => {
@@ -124,7 +147,7 @@ useEffect(() => {
         `http://localhost:3000/messages?sender_id=${user._id}&receiver_id=${receiverId}`
       );
       const data = await res.json();
-      console.log(messages);
+      
       setMessages(data);
     };
 
@@ -145,19 +168,24 @@ useEffect(() => {
               </div>
               <div className="flex h-[590px] overflow-hidden">
                 <div className="w-[35%] border-r border-gray-300 overflow-y-auto bg-white">
-                  {console.log(connections)}
                   {connections?.map((conn) => (
                     <div
                       key={conn?._id}
                       className={`flex items-center cursor-pointer border-b border-gray-200 gap-3 p-4 hover:bg-gray-100 ${
                         conn?._id === receiverId ? "bg-gray-200" : ""
                       }`}
-                      onClick={() => navigate(`/messages?user=${conn._id}`)}
+                      onClick={() => handleChangeConn(conn?._id)}
                     >
                       <i className="fa-solid fa-user shrink-0 text-xl"></i>
                       <div>
-                        <div className="font-semibold">{conn?.username}</div>
-                       
+                        <div className="font-semibold flex items-center gap-2">
+                          {conn?.username}
+                          {conn?.unreadCount > 0 && (
+                            <span className="bg-blue-500 text-white text-xs font-bold px-2 py-0.5 rounded-full">
+                              {conn.unreadCount}
+                            </span>
+                          )}
+                        </div>
                       </div>
                     </div>
                   ))}

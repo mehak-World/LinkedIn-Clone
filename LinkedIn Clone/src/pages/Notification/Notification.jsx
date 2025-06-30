@@ -10,6 +10,13 @@ const Notification = () => {
   const [refresh, setRefresh] = useState(false);
 
   useEffect(() => {
+    const readAllNotifs = async () => {
+      await axios.post("http://localhost:3000/connections/readNotif", {user_id: user._id})
+    }
+    readAllNotifs();
+  })
+
+  useEffect(() => {
     const getNotifications = async () => {
       const res = await axios.get(
         "http://localhost:3000/profile/" + user._id + "/notifications"

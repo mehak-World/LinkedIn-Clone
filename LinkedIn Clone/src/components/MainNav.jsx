@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { io } from "socket.io-client";
@@ -11,10 +11,39 @@ const MainNav = () => {
   const user = JSON.parse(localStorage.getItem("user"));
   const [active, setActive] = useState("Home");
   const [unreadNotifCount, setUnreadNotifCount] = useState(0);
+  const [unreadMsgCount, setUnreadMsgCount] = useState(0);
 
   // For search
   const [query, setQuery] = useState("");
   const [suggestions, setSuggestions] = useState([]);
+
+   useEffect(() => {
+    const getNotifications = async () => {
+      const res = await axios.get(
+        "http://localhost:3000/profile/" + user._id + "/notifications"
+      );
+      if (res) {
+        console.log(res.data);
+        const unread_notif = res.data.filter((notif) => !notif?.read)
+        setUnreadNotifCount(unread_notif.length)
+      }
+    };
+
+    const getMessages = async () => {
+      const res = await axios.get(
+        "http://localhost:3000/messages/" + user._id 
+      );
+      if (res) {
+        console.log(res.data);
+        const unread_msg = res.data.filter((msg) => !msg?.read)
+        console.log(unread_msg)
+        setUnreadMsgCount(unread_msg.length)
+      }
+    };
+
+    getNotifications();
+    getMessages();
+  }, []);
 
   useEffect(() => {
     if (user?._id) {
@@ -122,14 +151,20 @@ const MainNav = () => {
 
           <Link to="/messages">
             <div
-              className={`flex flex-col justify-center items-center gap-2 ${
-                active === "Messages"
+               className={`relative flex flex-col justify-center items-center gap-2 ${
+                active === "Notification"
                   ? "text-black border-b-2 border-black"
                   : "text-gray-500"
               }`}
               onClick={() => setActive("Messages")}
             >
-              <i className="fa-solid fa-message"></i>
+              <i className="fa-solid fa-message">
+                 {unreadMsgCount > 0 && (
+                  <span className="absolute -top-2 -right-2 bg-red-600 text-white text-xs px-1.5 py-0.5 rounded-full">
+                    {unreadMsgCount}
+                  </span>
+                )}
+              </i>
               <li>Messages</li>
             </div>
           </Link>

@@ -33,7 +33,8 @@ const profileSchema = new mongoose.Schema({
             to: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
             message: String,
             date: Date,
-            notifType: String
+            notifType: String,
+            read: Boolean
         }
     ],
     messages: [
@@ -45,7 +46,8 @@ const profileSchema = new mongoose.Schema({
             date: {
                 type: Date,
                 default: Date.now
-            }
+            },
+            read: Boolean
         }
     ]
 })

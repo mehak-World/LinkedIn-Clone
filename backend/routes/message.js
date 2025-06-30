@@ -33,6 +33,12 @@ router.get("/", async (req, res) => {
   }
 });
 
+router.get("/:id", async (req, res) => {
+  const user_id = req.params.id;
+  const user = await User.findById(user_id).populate("profile");
+  res.send(user.profile.messages);
+})
+
 
 router.post("/", async (req, res) => {
   try {
@@ -58,16 +64,25 @@ router.post("/", async (req, res) => {
     }
 
     // Create message object
-    const messageObj = {
+    const senderMessageObj = {
       sender: sender_id,
       receiver: receiver_id,
       msg,
-      date: new Date()
+      date: new Date(),
+      read: true
+    };
+
+    const receiverMessageObj = {
+      sender: sender_id,
+      receiver: receiver_id,
+      msg,
+      date: new Date(),
+      read: false
     };
 
     // Push message to both profiles
-    sender.profile.messages.push(messageObj);
-    receiver.profile.messages.push(messageObj);
+    sender.profile.messages.push(senderMessageObj);
+    receiver.profile.messages.push(receiverMessageObj);
 
     await sender.profile.save();
     await receiver.profile.save();
@@ -79,14 +94,15 @@ router.post("/", async (req, res) => {
   }
 });
 
-
 router.get("/connections/:userId", async (req, res) => {
   const userId = req.params.userId;
   const user = await User.findById(userId).populate("profile");
+
   if (!user) {
     return res.status(404).json({ error: "User or profile not found" });
   }
-  if(!user.profile){
+
+  if (!user.profile) {
     const newProfile = new Profile();
     await newProfile.save();
     user.profile = newProfile;
@@ -94,23 +110,97 @@ router.get("/connections/:userId", async (req, res) => {
   }
 
   const messages = user.profile.messages || [];
-
-  // Extract unique receiver and sender IDs that are not self
-  const connectionsSet = new Set();
+  const connectionsMap = new Map();
 
   messages.forEach((msg) => {
     const senderId = msg.sender.toString();
     const receiverId = msg.receiver.toString();
 
-    if (senderId !== userId) connectionsSet.add(senderId);
-    if (receiverId !== userId) connectionsSet.add(receiverId);
+    let otherUserId = null;
+
+    if (senderId !== userId) otherUserId = senderId;
+    if (receiverId !== userId) otherUserId = receiverId;
+
+    if (!otherUserId) return;
+
+    const isUnread = receiverId === userId && msg.read === false;
+
+    if (!connectionsMap.has(otherUserId)) {
+      connectionsMap.set(otherUserId, { unreadCount: 0 });
+    }
+
+    if (isUnread) {
+      connectionsMap.get(otherUserId).unreadCount += 1;
+    }
   });
 
-  const connectionIds = Array.from(connectionsSet);
+  const connectionIds = Array.from(connectionsMap.keys());
 
   const users = await User.find({ _id: { $in: connectionIds } }).populate("profile");
 
-  res.json(users);
+  const result = users.map((u) => ({
+    _id: u._id,
+    username: u.username,
+    unreadCount: connectionsMap.get(u._id.toString())?.unreadCount || 0,
+  }));
+
+  res.json(result);
 });
+
+
+
+// router.get("/connections/:userId", async (req, res) => {
+//   const userId = req.params.userId;
+//   const user = await User.findById(userId).populate("profile");
+//   if (!user) {
+//     return res.status(404).json({ error: "User or profile not found" });
+//   }
+//   if(!user.profile){
+//     const newProfile = new Profile();
+//     await newProfile.save();
+//     user.profile = newProfile;
+//     await user.save();
+//   }
+
+//   const messages = user.profile.messages || [];
+
+//   // Extract unique receiver and sender IDs that are not self
+//   const connectionsSet = new Set();
+
+//   messages.forEach((msg) => {
+//     const senderId = msg.sender.toString();
+//     const receiverId = msg.receiver.toString();
+
+//     if (senderId !== userId) connectionsSet.add(senderId);
+//     if (receiverId !== userId) connectionsSet.add(receiverId);
+//   });
+
+//   const connectionIds = Array.from(connectionsSet);
+
+//   const users = await User.find({ _id: { $in: connectionIds } }).populate("profile");
+
+//   res.json(users);
+// });
+
+router.post("/readMsg", async (req, res) => {
+  const { user_id, conn_id } = req.body;
+
+  const user = await User.findById(user_id).populate("profile");
+
+  let updated = false;
+  for (let msg of user.profile.messages) {
+    if (msg.sender.toString() === conn_id && !msg.read) {
+      msg.read = true;
+      updated = true;
+    }
+  }
+
+  if (updated) {
+    await user.profile.save();
+  }
+
+  res.send("Messages read successfully");
+});
+
 
 module.exports = router;
