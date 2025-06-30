@@ -3,6 +3,7 @@ import axios from "axios";
 import Comment from "./Comment.jsx";
 import { UserContext } from "../utils/UserContext.jsx";
 import { Link } from "react-router-dom";
+import parse from 'html-react-parser';
 
 const PostCard = ({ post }) => {
   const [showComments, setShowComments] = useState(false);
@@ -56,7 +57,7 @@ const PostCard = ({ post }) => {
         <h4>{post.author.username}</h4>
       </Link>
       <p className="text-gray-700">{post.title}</p>
-      <p className="text-gray-500">{post.content}</p>
+      <p className="text-gray-500">{parse(post.content)}</p>
       {post.images && post.images.length > 0 && (
         <div className="my-2 flex justify-center">
           <div className="w-full aspect-video overflow-hidden rounded-lg">

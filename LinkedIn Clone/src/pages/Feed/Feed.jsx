@@ -6,6 +6,7 @@ import CreatePost from '../../components/CreatePost.jsx'
 import axios from 'axios';
 import { getUser } from '../../utils/user.js'
 
+
 const Feed = () => {
 
     const [posts, setPosts] = useState([])

@@ -6,7 +6,6 @@ const User = require("../models/User.js");
 const Profile  = require("../models/Profile.js")
 const {generate_token} = require("../utils/auth.js")
 
-
 router.post("/sign-in", async (req, res) => {
   console.log(req.body);
   const { email, password } = req.body;
@@ -21,6 +20,13 @@ router.post("/sign-in", async (req, res) => {
     const result = await bcrypt.compare(password, user.password);
     
     if (result) {
+      if(!user.profile){
+          const newProfile = new Profile();
+         
+          await newProfile.save()
+           user.profile = newProfile;
+          await user.save();
+      }
       const token = generate_token(user);
       res.send({
         message: "user has successfully signed-in",

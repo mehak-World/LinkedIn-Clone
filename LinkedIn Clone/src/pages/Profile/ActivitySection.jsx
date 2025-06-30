@@ -1,5 +1,12 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
+import parse from "html-react-parser";
+
+// Helper to strip HTML and return plain text
+const stripHtml = (html) => {
+  const doc = new DOMParser().parseFromString(html, "text/html");
+  return doc.body.textContent || "";
+};
 
 const ActivitySection = ({ id }) => {
   const [posts, setPosts] = useState([]);
@@ -47,7 +54,12 @@ const ActivitySection = ({ id }) => {
                 </button>
               )}
               <h3 className="font-bold text-lg">{post.title}</h3>
-              <p className="text-gray-700 mt-1">{post.content}</p>
+
+              <p className="text-gray-700 mt-1">
+                {stripHtml(post.content).length > 200
+                  ? stripHtml(post.content).slice(0, 200) + "..."
+                  : stripHtml(post.content)}
+              </p>
 
               {/* Images */}
               {post.images?.length > 0 && (

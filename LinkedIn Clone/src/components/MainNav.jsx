@@ -17,27 +17,25 @@ const MainNav = () => {
   const [query, setQuery] = useState("");
   const [suggestions, setSuggestions] = useState([]);
 
-   useEffect(() => {
+  useEffect(() => {
     const getNotifications = async () => {
       const res = await axios.get(
         "http://localhost:3000/profile/" + user._id + "/notifications"
       );
       if (res) {
         console.log(res.data);
-        const unread_notif = res.data.filter((notif) => !notif?.read)
-        setUnreadNotifCount(unread_notif.length)
+        const unread_notif = res.data.filter((notif) => !notif?.read);
+        setUnreadNotifCount(unread_notif.length);
       }
     };
 
     const getMessages = async () => {
-      const res = await axios.get(
-        "http://localhost:3000/messages/" + user._id 
-      );
+      const res = await axios.get("http://localhost:3000/messages/" + user._id);
       if (res) {
         console.log(res.data);
-        const unread_msg = res.data.filter((msg) => !msg?.read)
-        console.log(unread_msg)
-        setUnreadMsgCount(unread_msg.length)
+        const unread_msg = res.data.filter((msg) => !msg?.read);
+        console.log(unread_msg);
+        setUnreadMsgCount(unread_msg.length);
       }
     };
 
@@ -87,6 +85,7 @@ const MainNav = () => {
       "/resume": "Resume",
       "/messages": "Messages",
       "/notifications": "Notification",
+      "/aiGenerate": "Explore AI",
       [`/profile/${user._id}`]: "Me",
     };
     setActive(pathMap[location.pathname] || "");
@@ -151,15 +150,15 @@ const MainNav = () => {
 
           <Link to="/messages">
             <div
-               className={`relative flex flex-col justify-center items-center gap-2 ${
-                active === "Notification"
+              className={`relative flex flex-col justify-center items-center gap-2 ${
+                active === "Messages"
                   ? "text-black border-b-2 border-black"
                   : "text-gray-500"
               }`}
               onClick={() => setActive("Messages")}
             >
               <i className="fa-solid fa-message">
-                 {unreadMsgCount > 0 && (
+                {unreadMsgCount > 0 && (
                   <span className="absolute -top-2 -right-2 bg-red-600 text-white text-xs px-1.5 py-0.5 rounded-full">
                     {unreadMsgCount}
                   </span>
@@ -200,6 +199,20 @@ const MainNav = () => {
             >
               <i className="fa-solid fa-user"></i>
               <li>Me</li>
+            </div>
+          </Link>
+
+          <Link to="/aiGenerate">
+            <div
+              className={`flex flex-col justify-center items-center gap-2 ${
+                active === "Explore AI"
+                  ? "text-black border-b-2 border-black"
+                  : "text-gray-500"
+              }`}
+              onClick={() => setActive("Explore AI")}
+            >
+            <i class="fa-solid fa-hexagon-nodes-bolt"></i>
+              <li>Explore AI</li>
             </div>
           </Link>
         </ul>

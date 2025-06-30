@@ -1,10 +1,13 @@
 const express = require('express');
+const { GoogleGenAI } = require("@google/genai");
 const router = express.Router();
 const Post = require('../models/Post.js');
 const multer = require("multer")
 const { handleUpload } = require("../utils/cloudinary_config.js")
 const upload = multer({ dest: 'uploads/' });
 const fs = require('fs');
+const { generateImage } = require('../utils/gemini_setup.js');
+const ai = new GoogleGenAI({api_key: process.env.GOOGLE_GEMINI_KEY});
 
 router.post("/create", upload.array('images', 5), async (req, res) => {
     console.log(req.body.userId);
@@ -18,7 +21,7 @@ router.post("/create", upload.array('images', 5), async (req, res) => {
     }
 
     const post = new Post({
-        title: req.body.title,
+        title: req.body?.title,
         content: req.body.content,
         author: req.body.userId,
         images: imageUrls
@@ -100,5 +103,46 @@ router.post("/:post_id/delete", async (req, res) => {
     await Post.findByIdAndDelete(post_id)
     res.send("deleted post")
 })
+
+router.post("/ai/create", upload.single('image'), async (req, res) => {
+    const {keywords} = req.body;
+    const marked = await import("marked").then(mod => mod.marked);
+    console.log(keywords)
+    // Make a call to the Gemini Api
+    const response = await ai.models.generateContent({
+    model: "gemini-2.5-flash",
+    contents: `Generate an interesting post for platform Like LinkedIn on ${keywords}. Do not include the top sentence "Here is the content..", just directly start with the content`,
+  });
+    const htmlContent = marked.parse(response.text);
+    const image_url = await generateImage(keywords);
+
+    // Now, create the image
+    // // const post = new Post({
+    // //     content: htmlContent
+    // // })
+
+    // // post.images.push(image_url)
+    // await post.save()
+    // console.log(post)
+    console.log(image_url)
+
+    res.status(200).send({content: htmlContent, image_url: image_url.secure_url})
+
+})
+
+router.post("/save", async (req, res) => {
+    const {content, image_url, user_id} = req.body;
+    const post = new Post({
+   content: content,
+   author: user_id
+  })
+
+    post.images.push(image_url)
+    await post.save()
+    console.log(post)
+    res.send(post);
+})
+
+
 
 module.exports = router;

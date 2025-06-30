@@ -14,6 +14,7 @@ import Education from "./pages/Profile/Education/AddEducation.jsx";
 import Experience from "./pages/Profile/Experience/AddExperience.jsx";
 import EditEducation from "./pages/Profile/Education/EditEducation.jsx";
 import EditExperience from "./pages/Profile/Experience/EditExperience.jsx";
+import AIGenerate from "./pages/AI_postGen/AIGenerate.jsx";
 
 const App = () => {
   return (
@@ -34,6 +35,7 @@ const App = () => {
         <Route path = "/profile/:user_id/experience" element = {<Experience />} />
         <Route path = "/profile/:user_id/education/:edu_id" element = {<EditEducation />} />
         <Route path = "/profile/:user_id/experience/:exp_id" element = {<EditExperience />} />
+        <Route path = "/aiGenerate" element = {<AIGenerate />} />
       </Routes>
     </BrowserRouter>
     </UserProvider>
