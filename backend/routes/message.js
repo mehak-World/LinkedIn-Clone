@@ -2,7 +2,7 @@ const express = require("express");
 const router = express.Router();
 const User = require("../models/User.js");
 
-// In your /routes/messages.js or similar
+// Get all the messagers between user and receiver
 router.get("/", async (req, res) => {
   const { sender_id, receiver_id } = req.query;
 
@@ -33,6 +33,7 @@ router.get("/", async (req, res) => {
   }
 });
 
+// Returns all messages of a specific user.
 router.get("/:id", async (req, res) => {
   const user_id = req.params.id;
   const user = await User.findById(user_id).populate("profile");
@@ -40,6 +41,7 @@ router.get("/:id", async (req, res) => {
 })
 
 
+// Create a message between sender and receiver and saves it in the database for both users
 router.post("/", async (req, res) => {
   try {
     const { sender_id, receiver_id, msg } = req.body;
@@ -47,22 +49,7 @@ router.post("/", async (req, res) => {
     const sender = await User.findById(sender_id).populate("profile");
     const receiver = await User.findById(receiver_id).populate("profile");
 
-    // Ensure sender has a profile
-    if (!sender.profile) {
-      const newProfile = new Profile();
-      await newProfile.save();
-      sender.profile = newProfile;
-      await sender.save();
-    }
-
-    // Ensure receiver has a profile
-    if (!receiver.profile) {
-      const newProfile = new Profile();
-      await newProfile.save();
-      receiver.profile = newProfile;
-      await receiver.save();
-    }
-
+   
     // Create message object
     const senderMessageObj = {
       sender: sender_id,
@@ -94,19 +81,13 @@ router.post("/", async (req, res) => {
   }
 });
 
+// Get all the connections of the user who have messaged user or have been messaged by the user
 router.get("/connections/:userId", async (req, res) => {
   const userId = req.params.userId;
   const user = await User.findById(userId).populate("profile");
 
   if (!user) {
     return res.status(404).json({ error: "User or profile not found" });
-  }
-
-  if (!user.profile) {
-    const newProfile = new Profile();
-    await newProfile.save();
-    user.profile = newProfile;
-    await user.save();
   }
 
   const messages = user.profile.messages || [];
@@ -147,41 +128,7 @@ router.get("/connections/:userId", async (req, res) => {
   res.json(result);
 });
 
-
-
-// router.get("/connections/:userId", async (req, res) => {
-//   const userId = req.params.userId;
-//   const user = await User.findById(userId).populate("profile");
-//   if (!user) {
-//     return res.status(404).json({ error: "User or profile not found" });
-//   }
-//   if(!user.profile){
-//     const newProfile = new Profile();
-//     await newProfile.save();
-//     user.profile = newProfile;
-//     await user.save();
-//   }
-
-//   const messages = user.profile.messages || [];
-
-//   // Extract unique receiver and sender IDs that are not self
-//   const connectionsSet = new Set();
-
-//   messages.forEach((msg) => {
-//     const senderId = msg.sender.toString();
-//     const receiverId = msg.receiver.toString();
-
-//     if (senderId !== userId) connectionsSet.add(senderId);
-//     if (receiverId !== userId) connectionsSet.add(receiverId);
-//   });
-
-//   const connectionIds = Array.from(connectionsSet);
-
-//   const users = await User.find({ _id: { $in: connectionIds } }).populate("profile");
-
-//   res.json(users);
-// });
-
+// Marks a message as read
 router.post("/readMsg", async (req, res) => {
   const { user_id, conn_id } = req.body;
 

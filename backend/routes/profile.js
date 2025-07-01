@@ -11,36 +11,34 @@ const fs = require("fs");
 
 // Update About section
 router.post("/:user_id/about", async (req, res) => {
-  const user_id = req.params.user_id;
+
+  try{
+        const user_id = req.params.user_id;
   const user = await User.findById(user_id).populate("profile");
   const { about } = req.body;
-
-  if (user.profile) {
-    // Update the existing profile
-    let p = user.profile;
-    p.about = about;
-    await p.save();
-    user.profile = p;
-    await user.save();
-  } else {
-    // Create a new profile
-    const profile = new Profile({ about });
-    await profile.save();
-    user.profile = profile;
-    await user.save();
+  const p = user.profile;
+  p.about = about;
+  await p.save();
+  user.profile = p
+  await user.save();
+  
+  res.status(200).send("About section saved successfully.");
   }
 
-  res.status(200).send("About section saved successfully.");
+  catch(err){
+    res.status(500).send("An error occured while updating about section.")
+  }
+
 });
 
 router.post("/:id/bio", async (req, res) => {
+  
   const id = req.params.id;
 
-  // Find the user with this id
+  try{
+ // Find the user with this id
   const user = await User.findById(id).populate("profile");
   const { title, city, country } = req.body;
-
-  if (user.profile) {
     // Update the profile
     const p = user.profile;
     p.profileTitle = title;
@@ -49,21 +47,19 @@ router.post("/:id/bio", async (req, res) => {
     await p.save();
     user.profile = p;
     await user.save();
-  } else {
-    // Create a new profile for the user with this info
-    const profile = new Profile({ profileTitle: title, city, country });
-    await profile.save();
-    user.profile = profile;
-    await user.save();
+    res.status(200).send("Bio saved successfully");
   }
-
-  res.status(200).send("Bio saved successfully");
+  catch(err){
+res.status(500).send("an error occured");
+  }
+ 
 });
 
 router.post("/:id/education", async (req, res) => {
   const id = req.params.id;
 
-  const user = await User.findById(id).populate("profile");
+  try{
+ const user = await User.findById(id).populate("profile");
   const {
     school,
     startDate,
@@ -85,28 +81,27 @@ router.post("/:id/education", async (req, res) => {
     city,
     country,
   });
-  if (user.profile) {
-    console.log(currentlyStudying);
-    const p = user.profile;
 
+    const p = user.profile;
     await education.save();
     p.education.push(education);
     await p.save();
     user.profile = p;
     await user.save();
-  } else {
-    const p = new Profile();
-    p.education.push(education);
-    await p.save();
-    user.profile = p;
-    await user.save();
-  }
+
 
   res.status(200).send("education saved successfully");
+  }
+
+  catch(err){
+    res.status(500).send("an error occured");
+  }
+ 
 });
 
 router.post("/:id/experience", async (req, res) => {
-  const {
+  try{
+        const {
     position,
     company,
     city,
@@ -119,7 +114,6 @@ router.post("/:id/experience", async (req, res) => {
   const userId = req.params.id;
   const user = await User.findById(userId).populate("profile");
 
-  if (user.profile) {
     const p = user.profile;
     const exp = new Experience({
       position,
@@ -135,16 +129,14 @@ router.post("/:id/experience", async (req, res) => {
     p.experience.push(exp);
     await p.save();
     user.profile = p;
-    await user.save();
-  } else {
-    const p = new Profile();
-    p.experience.push(exp);
-    await p.save();
-    user.profile = p;
-    await user.save();
-  }
+    await user.save(); 
 
   res.status(200).send("experience saved successfully");
+  }
+  catch(err){
+    res.status(500).send("an error occured");
+  }
+
 });
 
 router.get("/:id", async (req, res) => {
@@ -163,99 +155,125 @@ router.get("/:id", async (req, res) => {
 
 
 router.post("/:user_id/bgImage", upload.single("image"), async (req, res) => {
-  const result = await handleUpload(req.file.path);
-  console.log(result);
+  try{
+       const result = await handleUpload(req.file.path);
   const id = req.params.user_id;
   const user = await User.findById(id).populate("profile");
-  if (user.profile) {
     const p = user.profile;
     p.bgPic = result.secure_url;
     await p.save();
     user.profile = p;
     await user.save();
-  } else {
-    const p = new Profile();
-    p.bgPic = result.secure_url;
-    await p.save();
-    user.profile = p;
-    await user.save();
-  }
+  
   res.send("bg pic saved successfully");
+  }
+  catch(err){
+    res.status(500).send("an error occured");
+  }
+ 
 });
 
 router.post(
   "/:user_id/profilePic",
   upload.single("image"),
   async (req, res) => {
-    const result = await handleUpload(req.file.path);
-    console.log(result);
+    try{
+const result = await handleUpload(req.file.path);
     const id = req.params.user_id;
     const user = await User.findById(id).populate("profile");
-    if (user.profile) {
+    
       const p = user.profile;
       p.profilePic = result.secure_url;
       await p.save();
       user.profile = p;
       await user.save();
-    } else {
-      const p = new Profile();
-      p.profilePic = result.secure_url;
-      await p.save();
-      user.profile = p;
-      await user.save();
-    }
-
     res.send("bg pic saved successfully");
+    }
+    catch(err){
+      res.status(500).send("an error occured");
+    }
   }
 );
 
 router.get("/:user_id/education/:education_id", async (req, res) => {
+  try{
   const { education_id } = req.params;
   const education = await Education.findById(education_id);
-  res.status(200).send(education);
+  res.status(200).send(education);  
+  }
+  catch(err){
+    res.status(500).send("an error occured");
+  }
+  
 });
 
 router.post("/:user_id/education/:education_id", async (req, res) => {
-  const { user_id, education_id } = req.params;
+  try{
+ const { user_id, education_id } = req.params;
   await Education.findByIdAndUpdate(education_id, req.body);
   res.status(200).send("Education updated successfully");
+  }catch(err){
+    res.status(500).send("an error occured");
+  }
+ 
 });
 
 router.post("/:user_id/experience/:experience_id", async (req, res) => {
-  const { user_id, experience_id } = req.params;
+  try{
+      const {experience_id } = req.params;
   await Experience.findByIdAndUpdate(experience_id, req.body);
   res.status(200).send("Experience updated successfully");
+  }
+  catch(err){
+    res.status(500).send("an error occured");
+  }
+  
 });
 
 router.get("/:user_id/notifications", async (req, res) => {
-  const user_id = req.params.user_id;
+  try{
+ const user_id = req.params.user_id;
   const user = await User.findById(user_id).populate("profile");
-  if(!user.profile){
-    user.profile = new Profile();
-  }
   // Extract notifications:
   const notifications = user.profile.notifications;
   res.send(notifications);
+  }
+  catch(err){
+    res.status(500).send("an error occured");
+  }
+ 
 })
 
 router.post("/:user_id/experience/:exp_id/delete", async (req, res) => {
-  const {user_id, exp_id} = req.params;
-  console.log(user_id, exp_id)
+  try{
+ const {user_id, exp_id} = req.params;
       const exp = await Experience.findByIdAndDelete(exp_id);
       const user  = await User.findById(user_id).populate("profile");
       user.profile.experience = user.profile.experience.filter((exp) => exp.toString() != exp_id);
       await user.profile.save();
       res.status(200).send("Experience deleted successfully")
+  }
+  catch(err){
+    res.status(500).send("an error occured");
+  }
+ 
 })
 
 
 router.post("/:user_id/education/:edu_id/delete", async (req, res) => {
-  const {user_id, edu_id} = req.params;
+  try{
+      const {user_id, edu_id} = req.params;
       const edu = await Education.findByIdAndDelete(edu_id);
       const user  = await User.findById(user_id).populate("profile");
       user.profile.education = user.profile.education.filter((edu) => edu.toString() != edu_id);
       await user.profile.save();
       res.status(200).send("Education deleted successfully")
+  }
+
+  catch(err){
+    res.status(500).send("an error occured");
+  }
+  
 })
 
 module.exports = router;

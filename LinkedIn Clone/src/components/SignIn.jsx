@@ -1,8 +1,7 @@
-import { useState, useEffect, useContext } from "react";
+import { useState, useEffect} from "react";
 import HomeNav from "./HomeNav";
 import { useNavigate, useParams } from "react-router-dom";
 import { ToastContainer, toast } from "react-toastify";
-import { UserContext } from "../utils/UserContext";
 import { signUp, signIn } from "../utils/auth";
 import GoogleAuth from "./GoogleAuth";
 
@@ -11,7 +10,7 @@ const SignIn = () => {
   const navigate = useNavigate();
   // Create state variable to manage the sign in/sign up status
   const [isSignUp, setIsSignUp] = useState(initial == "true");
-  const { user, setUser } = useContext(UserContext);
+  const user = JSON.parse(localStorage.getItem("user"))
 
   // State variables for email, name, and password
   const [email, setEmail] = useState("");
@@ -19,12 +18,12 @@ const SignIn = () => {
   const [password, setPassword] = useState("");
 
   const handleSignUp = async (e) => {
-    console.log(user);
+
     e.preventDefault();
     if (isSignUp) {
-      signUp(email, name, password, toast, navigate, setUser);
+      signUp(email, name, password, toast, navigate);
     } else {
-      signIn(email, password, toast, navigate, setUser);
+      signIn(email, password, toast, navigate);
     }
   };
 

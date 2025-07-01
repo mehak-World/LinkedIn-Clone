@@ -11,7 +11,14 @@ const MainNav = () => {
   const user = JSON.parse(localStorage.getItem("user"));
   const [active, setActive] = useState("Home");
   const [unreadNotifCount, setUnreadNotifCount] = useState(0);
+  const [dropdownOpen, setDropdownOpen] = useState(false);
   const [unreadMsgCount, setUnreadMsgCount] = useState(0);
+
+  useEffect(() => {
+    if (!user) {
+      navigate("/");
+    }
+  });
 
   // For search
   const [query, setQuery] = useState("");
@@ -20,7 +27,7 @@ const MainNav = () => {
   useEffect(() => {
     const getNotifications = async () => {
       const res = await axios.get(
-        "http://localhost:3000/profile/" + user._id + "/notifications"
+        "http://localhost:3000/profile/" + user?._id + "/notifications"
       );
       if (res) {
         console.log(res.data);
@@ -30,7 +37,9 @@ const MainNav = () => {
     };
 
     const getMessages = async () => {
-      const res = await axios.get("http://localhost:3000/messages/" + user._id);
+      const res = await axios.get(
+        "http://localhost:3000/messages/" + user?._id
+      );
       if (res) {
         console.log(res.data);
         const unread_msg = res.data.filter((msg) => !msg?.read);
@@ -39,8 +48,10 @@ const MainNav = () => {
       }
     };
 
-    getNotifications();
-    getMessages();
+    if (user) {
+      getNotifications();
+      getMessages();
+    }
   }, []);
 
   useEffect(() => {
@@ -86,10 +97,10 @@ const MainNav = () => {
       "/messages": "Messages",
       "/notifications": "Notification",
       "/aiGenerate": "Explore AI",
-      [`/profile/${user._id}`]: "Me",
+      [`/profile/${user?._id}`]: "Me",
     };
     setActive(pathMap[location.pathname] || "");
-  }, [location.pathname, user._id]);
+  }, [location.pathname, user?._id]);
 
   return (
     <div className="flex justify-between mx-20 my-5 relative">
@@ -106,11 +117,11 @@ const MainNav = () => {
             <ul className="absolute top-10 left-0 w-full bg-white border rounded-lg shadow z-50">
               {suggestions.map((user) => (
                 <li
-                  key={user._id}
+                  key={user?._id}
                   className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
-                  onClick={() => handleSelect(user._id)}
+                  onClick={() => handleSelect(user?._id)}
                 >
-                  {user.username}
+                  {user?.username}
                 </li>
               ))}
             </ul>
@@ -188,19 +199,49 @@ const MainNav = () => {
             </div>
           </Link>
 
-          <Link to={`/profile/${user._id}`}>
+          <div className="relative">
             <div
-              className={`flex flex-col justify-center items-center gap-2 ${
+              className={`flex flex-col justify-center items-center gap-2 cursor-pointer ${
                 active === "Me"
                   ? "text-black border-b-2 border-black"
                   : "text-gray-500"
               }`}
-              onClick={() => setActive("Me")}
+              onClick={() => setDropdownOpen(!dropdownOpen)}
             >
               <i className="fa-solid fa-user"></i>
               <li>Me</li>
             </div>
-          </Link>
+
+            {dropdownOpen && (
+              <ul className="absolute right-0 mt-2 bg-white border rounded-md shadow-lg z-10 min-w-[120px]">
+                <li>
+                  <Link
+                    to={`/profile/${user?._id}`}
+                    className="block px-4 py-2 hover:bg-gray-100"
+                    onClick={() => {
+                      setDropdownOpen(false);
+                      setActive("Me");
+                    }}
+                  >
+                    Profile
+                  </Link>
+                </li>
+                <li>
+                  <button
+                    className="w-full text-left px-4 py-2 hover:bg-gray-100"
+                    onClick={() => {
+                      localStorage.removeItem("user");
+                      localStorage.removeItem("token");
+                      setDropdownOpen(false);
+                      navigate("/");
+                    }}
+                  >
+                    Logout
+                  </button>
+                </li>
+              </ul>
+            )}
+          </div>
 
           <Link to="/aiGenerate">
             <div
@@ -211,7 +252,7 @@ const MainNav = () => {
               }`}
               onClick={() => setActive("Explore AI")}
             >
-            <i class="fa-solid fa-hexagon-nodes-bolt"></i>
+              <i className="fa-solid fa-hexagon-nodes-bolt"></i>
               <li>Explore AI</li>
             </div>
           </Link>

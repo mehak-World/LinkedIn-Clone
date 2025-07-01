@@ -20,7 +20,6 @@ const Comment = ({comment}) => {
           <p className="text-gray-700">{comment.content}</p>
         </div>
       </div>
-      {/* {user._id == comment.author._id && <button className = "bg-black p-2 text-white rounded-lg" onClick = {handleDeleteComment}>Delete</button>} */}
     </div>
   )
 }

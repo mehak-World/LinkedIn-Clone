@@ -23,21 +23,23 @@ const Profile = () => {
   const profilePicInputRef = useRef(null);
   const navigate = useNavigate();
   
-  
 
   // Get the logged In user
   const user = JSON.parse(localStorage.getItem("user"));
   
-const [profileUser, setProfileUser] = useState(null);
+  const [profileUser, setProfileUser] = useState(null);
 
-useEffect(() => {
+  useEffect(() => {
   const getProfileUser = async () => {
-    const data = await getUser(user._id);
+    const data = await getUser(user?._id);
     setProfileUser(data);
   };
 
-  getProfileUser();
-}, [user._id]);
+  if(user){
+      getProfileUser();
+  }
+  
+}, [user?._id]);
 
 
 
@@ -64,7 +66,10 @@ useEffect(() => {
       }
     };
 
-    getProfile();
+    if(id){
+         getProfile();
+    }
+   
   }, [id]);
 
   return (
@@ -80,7 +85,7 @@ useEffect(() => {
                 {profile?.bgPic ? <img
                   src={profile?.bgPic}
                   alt="Background"
-                  className="w-full h-full object-cover" // or object-contain
+                  className="w-full h-full object-cover" 
                 />: ''}
               </div>
 
@@ -92,7 +97,8 @@ useEffect(() => {
                 className="hidden"
               />
 
-              {user._id == id && (
+              {/* Change background picture */}
+              {user?._id == id && (
                 <i
                   className="absolute right-10 top-10 fa-solid fa-pen cursor-pointer text-white bg-black bg-opacity-50 rounded p-2 hover:bg-opacity-75 transition"
                   onClick={handleBgPicClick}
@@ -112,7 +118,7 @@ useEffect(() => {
                 <i className="text-3xl fa-solid fa-user text-gray-600" />
               )}
 
-              {user._id == id && (
+              {user?._id == id && (
                 <>
                   <input
                     type="file"
@@ -135,8 +141,8 @@ useEffect(() => {
 
             <div className="px-10 pt-20 flex justify-between">
               <div>
-                 <h3 className="text-2xl ">{username}</h3>
-                <h6 className=" text-gray-900">{profile?.profileTitle}</h6>
+                 <h3 className="text-2xl ">{username}</h3>  {/* Username */}
+                <h6 className=" text-gray-900">{profile?.profileTitle}</h6> {/* Profile Title */}
                 <br />
                 {profile?.city && profile?.country && <h3 className="text-md text-gray-600 ">
                   {profile?.city}, {profile?.country}
@@ -149,7 +155,8 @@ useEffect(() => {
                 </h3>
               </div>
 
-              {user._id == id && (
+              {/* Edit Bio */}
+              {user?._id == id && (
                 <div>
                   <Link to={"/profile/" + id + "/bio"}>
                     <i class="fa-solid fa-pen"></i>
@@ -158,23 +165,25 @@ useEffect(() => {
               )}
             </div>
 
-            {user._id != id &&
-              !profile?.connections?.includes(user._id) &&
-              !profile?.pendingRequests?.includes(user._id) && (
+              {/* Buttons to connect or msg */}
+            {user?._id != id &&
+              !profile?.connections?.includes(user?._id) &&
+              !profile?.pendingRequests?.includes(user?._id) && (
                 <button
                   className="bg-blue-600 text-white p-3 rounded-xl m-10"
-                  onClick={() => handleConnection(setProfile, id, user._id)}
+                  onClick={() => handleConnection(setProfile, id, user?._id)}
                 >
                   Connect
                 </button>
               )}
-            {user._id != id && profile?.pendingRequests?.includes(user._id) && (
+
+            {user?._id != id && profile?.pendingRequests?.includes(user?._id) && (
               <button className="bg-blue-400 text-white p-3 rounded-xl m-10">
                 Pending
               </button>
             )}
 
-            {user._id != id && profile?.connections?.includes(user._id) && (
+            {user?._id != id && profile?.connections?.includes(user?._id) && (
               <button
                 className="bg-blue-400 text-white p-3 rounded-xl m-10"
                 onClick={handleMessage}
@@ -185,19 +194,17 @@ useEffect(() => {
           </div>
 
           {/* About */}
-          <ProfileAbout user_id={user._id} profile={profile} id={id} />
-          {console.log(user._id)}
-          <ActivitySection user_id={user._id} id={id} />
-
+          <ProfileAbout user_id={user?._id} profile={profile} id={id} />
+          {/* Activity Section */}
+          <ActivitySection user_id={user?._id} id={id} />
           {/* Experience section */}
-          <ProfileExperience user_id={user._id} profile={profile} setProfile = {setProfile} id={id} />
-
+          <ProfileExperience user_id={user?._id} profile={profile} setProfile = {setProfile} id={id} />
           {/* Education */}
-          <ProfileEducation user_id={user._id} profile={profile} setProfile = {setProfile} id={id} />
+          <ProfileEducation user_id={user?._id} profile={profile} setProfile = {setProfile} id={id} />
         </div>
+        
         {/* right */}
         <div className="w-[30%]">
-          {console.log(profileUser)}
           <ProfileCard user = {profileUser}/>
         </div>
       </div>

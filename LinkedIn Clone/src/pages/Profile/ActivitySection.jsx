@@ -1,6 +1,5 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import axios from "axios";
-import parse from "html-react-parser";
 
 // Helper to strip HTML and return plain text
 const stripHtml = (html) => {
@@ -67,7 +66,7 @@ const ActivitySection = ({ id }) => {
                   {post.images.map((img, index) => (
                     <img
                       key={index}
-                      src={img}
+                      src={img.url}
                       alt="Post"
                       className="w-full h-40 object-cover rounded"
                     />

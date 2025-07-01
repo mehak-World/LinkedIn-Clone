@@ -1,7 +1,6 @@
 const express = require("express");
 const router = express.Router();
 const bcrypt = require("bcrypt");
-const jwt = require("jsonwebtoken");
 const User = require("../models/User.js");
 const Profile  = require("../models/Profile.js")
 const {generate_token} = require("../utils/auth.js")
@@ -41,6 +40,7 @@ router.post("/sign-in", async (req, res) => {
 });
 
 router.post("/sign-up", async (req, res) => {
+  // This route signs up the user
   const { name, email, password } = req.body;
   console.log(req.body);
   const saltRounds = 10;
@@ -48,12 +48,13 @@ router.post("/sign-up", async (req, res) => {
     // Try to find the user with existing credentials
     const user = await User.findOne({ email });
     if (user) {
+      // If the user is already found, return
       return res.send("User has already been registered");
     }
     bcrypt.hash(password, saltRounds, async function (err, hash) {
-      // Store the user into the database
+      // Store the user into the database, attach a profile with the user, generate token and send to frontend
       const new_user = new User({ email, username: name, password: hash });
-       const newProfile = new Profile();
+      const newProfile = new Profile();
       await newProfile.save();
       new_user.profile = newProfile;
       await new_user.save();
@@ -70,6 +71,7 @@ router.post("/sign-up", async (req, res) => {
   }
 });
 
+// Used for sign in using Google
 router.post("/google-signin", async (req, res) => {
   const { name, email, password } = req.body;
   console.log(req.body);

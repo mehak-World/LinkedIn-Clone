@@ -18,12 +18,15 @@ const CreatePost = () => {
   }
 
   const handleSubmit = async (e) => {
+    if(!token){
+      return;
+    }
     e.preventDefault(); 
     const formData = new FormData();
     formData.append("title", title);
     formData.append("content", content);
     formData.append("userId", user._id);
-    images.forEach((img) => formData.append("images", img)); // ✅ "image" must match the field name in `upload.single('image')`
+    images.forEach((img) => formData.append("images", img)); 
 
     const res = await fetch("http://localhost:3000/posts/create", {
       method: "POST",

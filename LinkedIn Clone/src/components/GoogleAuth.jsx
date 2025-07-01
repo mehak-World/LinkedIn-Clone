@@ -1,14 +1,11 @@
 import { GoogleLogin } from "@react-oauth/google";
 import { GoogleOAuthProvider } from "@react-oauth/google";
 import { jwtDecode } from "jwt-decode";
-import { useContext } from "react";
-import { UserContext } from "../utils/UserContext";
 import {  toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
 import axios from "axios"
 
 const GoogleAuth = () => {
-  const { setUser } = useContext(UserContext);
   const navigate = useNavigate();
   return (
     <div>
@@ -29,7 +26,6 @@ const GoogleAuth = () => {
               .then((res) => {
                 localStorage.setItem("token", res.data.token);
                 localStorage.setItem("user", JSON.stringify(res.data.user));
-                setUser(res.data.user);
                 navigate("/feed");
               })
               .catch((err) => {

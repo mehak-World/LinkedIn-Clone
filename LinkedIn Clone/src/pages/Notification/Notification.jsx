@@ -11,15 +11,18 @@ const Notification = () => {
 
   useEffect(() => {
     const readAllNotifs = async () => {
-      await axios.post("http://localhost:3000/connections/readNotif", {user_id: user._id})
+      await axios.post("http://localhost:3000/connections/readNotif", {user_id: user?._id})
     }
-    readAllNotifs();
+    if(user){
+          readAllNotifs();
+    }
+  
   })
 
   useEffect(() => {
     const getNotifications = async () => {
       const res = await axios.get(
-        "http://localhost:3000/profile/" + user._id + "/notifications"
+        "http://localhost:3000/profile/" + user?._id + "/notifications"
       );
       if (res) {
         console.log(res.data);
@@ -27,11 +30,14 @@ const Notification = () => {
       }
     };
 
-    getNotifications();
+    if(user){
+      getNotifications();
+    }
+   
   }, [refresh]);
 
   const handleAccept = async (notif) => {
-    const res = await axios.post("http://localhost:3000/connections/accept" , {user_id: user._id, connection_id: notif.from });
+    const res = await axios.post("http://localhost:3000/connections/accept" , {user_id: user?._id, connection_id: notif.from });
     console.log(res)  
     if (res) {
         const notify = () => toast("Connection successfully added");
@@ -41,17 +47,17 @@ const Notification = () => {
   }
 
     const handleReject = async (id) => {
-    const res = await axios.post("http://localhost:3000/connections/reject" , {user_id: user._id, connection_id: id });
+    const res = await axios.post("http://localhost:3000/connections/reject" , {user_id: user?._id, connection_id: id });
       if (res) {
         const notify = () => toast("Connection ignored");
         notify()
-       setRefresh(!refresh);
+        setRefresh(!refresh);
       }
   }
 
 
   const handleNotifDelete = async (notif_id) => {
-      const res = await axios.post("http://localhost:3000/connections/notif/delete", {user_id: user._id, notif_id})
+      const res = await axios.post("http://localhost:3000/connections/notif/delete", {user_id: user?._id, notif_id})
       if(res){
         setRefresh(!refresh)
       }

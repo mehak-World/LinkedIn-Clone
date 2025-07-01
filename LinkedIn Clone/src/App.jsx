@@ -2,7 +2,6 @@ import Home from "./pages/home/Home.jsx";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import SignIn from "./pages/auth/SignIn.jsx";
 import Feed from "./pages/Feed/Feed.jsx";
-import UserProvider from "./utils/UserContext.jsx";
 import CreatePost from "./pages/CreatePost.jsx";
 import MyNetwork from "./pages/MyNetwork/MyNetwork.jsx";
 import Message from "./pages/Messages/Message.jsx";
@@ -18,7 +17,7 @@ import AIGenerate from "./pages/AI_postGen/AIGenerate.jsx";
 
 const App = () => {
   return (
-    <UserProvider>
+
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<Home />} />
@@ -38,7 +37,6 @@ const App = () => {
         <Route path = "/aiGenerate" element = {<AIGenerate />} />
       </Routes>
     </BrowserRouter>
-    </UserProvider>
    
   );
 };

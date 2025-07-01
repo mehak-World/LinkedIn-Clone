@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import io from "socket.io-client";
 import ProfileCard from "../../components/ProfileCard.jsx";
 import MainNav from "../../components/MainNav.jsx";
@@ -16,18 +16,19 @@ const Message = () => {
   const [connections, setConnections] = useState([]);
   const location = useLocation();
   const [messages, setMessages] = useState([]);
-
   const [receiverId, setReceiverId] = useState(null);
-  const [refresh, setRefresh] = useState(false);
-
   const [profileUser, setProfileUser] = useState(null);
+
   useEffect(() => {
     const getProfileUser = async () => {
       const data = await getUser(user?._id);
       setProfileUser(data);
     };
 
-    getProfileUser();
+    if(user){
+      getProfileUser();
+    }
+    
   }, [user?._id]);
 
   useEffect(() => {
@@ -37,40 +38,34 @@ const Message = () => {
   }, [location]);
 
   useEffect(() => {
-    socket.emit("join", user._id); // Join room on connect
+    socket.emit("join", user?._id); // Join room on connect
   }, []);
 
   const handleChangeConn = async (conn_id) => {
     await axios.post("http://localhost:3000/messages/readMsg", {
-      user_id: user._id,
+      user_id: user?._id,
       conn_id: conn_id,
     });
-    setRefresh(!refresh);
+    
     navigate(`/messages?user=${conn_id}`);
   };
 
   const handleSend = async () => {
     if (!message.trim()) return;
-
-    const senderId = user._id;
-
+    const senderId = user?._id;
     // Emit to socket for real-time
     socket.emit("send-msg", {
       sender: senderId,
       receiver: receiverId,
       msg: message,
     });
-
     // Send to backend to store in DB
-    await fetch("http://localhost:3000/messages", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
+    await axios.post("http://localhost:3000/messages", {
         sender_id: senderId,
         receiver_id: receiverId,
         msg: message,
-      }),
-    });
+      },
+    );
 
     setMessages((prev) => [
       ...prev,
@@ -87,14 +82,17 @@ const Message = () => {
   useEffect(() => {
     const fetchConnections = async () => {
       const res = await fetch(
-        `http://localhost:3000/messages/connections/${user._id}`
+        `http://localhost:3000/messages/connections/${user?._id}`
       );
       const data = await res.json();
       setConnections(data);
     };
 
-    fetchConnections();
-  }, [refresh]);
+    if(user){
+        fetchConnections();
+    }
+   
+  }, []);
 
   useEffect(() => {
     const fetchReceiver = async () => {
@@ -115,24 +113,20 @@ const Message = () => {
 
   useEffect(() => {
   socket.on("chat message", async (data) => {
-    console.log("executed")
     const isCurrentChatOpen =
-      (data.sender === receiverId && data.receiver === user._id) ||
-      (data.sender === user._id && data.receiver === receiverId);
-    console.log(isCurrentChatOpen)
+      (data.sender === receiverId && data.receiver === user?._id) ||
+      (data.sender === user?._id && data.receiver === receiverId);
 
     if (isCurrentChatOpen) {
       setMessages((prev) => [...prev, data]);
 
-      // ✅ Mark the message as read immediately if user is viewing the chat
-      if (data.sender === receiverId && data.receiver === user._id) {
-        console.log("getting executed")
+      // Mark the message as read immediately if user is viewing the chat
+      if (data.sender === receiverId && data.receiver === user?._id) {
         await axios.post("http://localhost:3000/messages/readMsg", {
-          user_id: user._id,
+          user_id: user?._id,
           conn_id: receiverId,
         });
 
-        setRefresh(!refresh)
       }
     }
   });
@@ -144,14 +138,14 @@ const Message = () => {
   useEffect(() => {
     const fetchMessages = async () => {
       const res = await fetch(
-        `http://localhost:3000/messages?sender_id=${user._id}&receiver_id=${receiverId}`
+        `http://localhost:3000/messages?sender_id=${user?._id}&receiver_id=${receiverId}`
       );
       const data = await res.json();
       
       setMessages(data);
     };
 
-    if (receiverId) {
+    if (receiverId && user) {
       fetchMessages();
     }
   }, [receiverId]);
@@ -197,7 +191,7 @@ const Message = () => {
                       <div
                         key={idx}
                         className={`max-w-[70%] px-4 py-2 rounded-lg ${
-                          msg.sender === user._id
+                          msg.sender === user?._id
                             ? "bg-blue-500 text-white ml-auto"
                             : "bg-gray-200 text-black"
                         }`}

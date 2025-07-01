@@ -1,7 +1,6 @@
-import React, { useState, useContext } from "react";
+import { useState } from "react";
 import axios from "axios";
 import Comment from "./Comment.jsx";
-import { UserContext } from "../utils/UserContext.jsx";
 import { Link } from "react-router-dom";
 import parse from 'html-react-parser';
 
@@ -54,7 +53,8 @@ const PostCard = ({ post }) => {
   return (
     <div className="p-2 w-130 bg-white rounded-lg shadow-md mb-4">
       <Link to={`/profile/${post.author._id}`}>
-        <h4>{post.author.username}</h4>
+        <h4>{post?.author?.username}</h4>
+         <h5>{post?.author?.profile?.profileTitle}</h5>
       </Link>
       <p className="text-gray-700">{post.title}</p>
       <p className="text-gray-500">{parse(post.content)}</p>
@@ -62,7 +62,7 @@ const PostCard = ({ post }) => {
         <div className="my-2 flex justify-center">
           <div className="w-full aspect-video overflow-hidden rounded-lg">
             <img
-              src={post.images[0]}
+              src={post?.images[0]?.url}
               alt="post"
               className="w-full h-full object-cover"
             />
