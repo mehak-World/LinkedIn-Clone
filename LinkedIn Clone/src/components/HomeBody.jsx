@@ -2,11 +2,12 @@ import React from "react";
 import { Link, useNavigate } from "react-router-dom";
 import GoogleAuth from "./GoogleAuth";
 
+
 const HomeBody = () => {
   const navigate = useNavigate();
   return (
-    <div className="grid grid-cols-2 grid-flow-col gap-4 m-[6%]">
-      <div>
+    <div className="flex flex-col items-center justify-center gap-4 m-[6%]">
+      <div className = "flex flex-col justify-center items-center mt-[5%]">
         <h1 className="text-4xl text-gray-500">
           Welcome to the Professional Community
         </h1>
@@ -22,9 +23,6 @@ const HomeBody = () => {
             </button>
           </Link>
           <br />
-          <small className="w-100 mx-10 my-4">
-            By clicking Lorem ipsum dolor sit amet.
-          </small>
         </div>
         <p className="my-10">
           New to LinkedIn?{" "}
@@ -33,13 +31,13 @@ const HomeBody = () => {
           </Link>
         </p>
       </div>
-      <div>
+      {/* <div>
         <img
-          className="w-[600px] h-[300px]"
-          src="https://static1.anpoimages.com/wordpress/wp-content/uploads/2023/09/linkedin-ap-hero-3-1.jpg"
+          className="w-[500px] h-[400px]"
+          src={linkifyIcon}
           alt=""
         />
-      </div>
+      </div> */}
     </div>
   );
 };

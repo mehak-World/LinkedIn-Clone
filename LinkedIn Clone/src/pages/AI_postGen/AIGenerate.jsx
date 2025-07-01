@@ -47,7 +47,7 @@ const AIGenerate = () => {
       <MainNav />
       <div className="max-w-xl mx-auto p-4 my-[5%]">
         <h2 className="text-2xl font-bold mb-4">
-          Generate LinkedIn Post with AI
+          Generate Linkify Post with AI
         </h2>
         <input
           type="text"

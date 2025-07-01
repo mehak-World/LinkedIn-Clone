@@ -2,6 +2,7 @@ import React from "react";
 import { Link } from "react-router-dom";
 import { signIn } from "../utils/auth";
 import { useNavigate } from "react-router-dom";
+import linkifyIcon from "../assets/linkify_icon.png";
 import { ToastContainer, toast } from "react-toastify";
 
 const HomeNav = () => {
@@ -12,11 +13,12 @@ const HomeNav = () => {
 
   return (
     <div className="flex justify-between mx-10 my-5">
-      <ToastContainer />
+      
       <Link to="/">
         <div className="flex gap-2 items-center">
-          <h3 className="text-blue-700 text-3xl bolder">Linked</h3>
-          <i className="fa-brands fa-linkedin text-blue-800 text-3xl"></i>
+          {/* <h3 className="text-blue-700 text-3xl bolder"></h3> */}
+          {/* <i className="fa-brands fa-linkedin text-blue-800 text-3xl"></i> */}
+          <img src = {linkifyIcon} alt = "site icon" className = "h-15 w-15" />
         </div>
       </Link>
 

@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { io } from "socket.io-client";
+import linkifyIcon from "../assets/linkify_icon.png";
 
 const socket = io("http://localhost:3000");
 
@@ -105,7 +106,7 @@ const MainNav = () => {
   return (
     <div className="flex justify-between mx-20 my-5 relative">
       <div className="flex gap-2 items-center relative">
-        <i className="fa-brands fa-linkedin text-blue-800 text-3xl"></i>
+        <img src = {linkifyIcon} alt = "site icon" className = "h-15 w-15" />
         <div className="relative">
           <input
             value={query}
