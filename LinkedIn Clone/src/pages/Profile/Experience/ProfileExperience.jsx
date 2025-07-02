@@ -4,6 +4,7 @@ import Card from "../../../components/Card";
 import { formatDate } from "../../../utils/profile";
 import axios from "axios";
 import { getProfile } from "../../../utils/profile";
+import { backend_url } from "../../../utils/app";
 
 const ProfileExperience = ({ user_id, id, profile, setProfile }) => {
   const [experiences, setExperiences] = useState([]);
@@ -20,7 +21,7 @@ const ProfileExperience = ({ user_id, id, profile, setProfile }) => {
 
   const handleDeleteExp = async (exp_id) => {
     const res = await axios.post(
-      `http://localhost:3000/profile/${user_id}/experience/${exp_id}/delete`
+      `${backend_url}/profile/${user_id}/experience/${exp_id}/delete`
     );
 
     if (res) {

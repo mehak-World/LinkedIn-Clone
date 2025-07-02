@@ -3,6 +3,7 @@ import MainNav from "../../../components/MainNav";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { useParams } from "react-router-dom";
+import { backend_url } from "../../../utils/app";
 
 const EditEducation = () => {
   const [education, setEducation] = useState({});
@@ -24,7 +25,7 @@ const EditEducation = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     const response = await axios.post(
-      "http://localhost:3000/profile/" + user._id + "/education/" + edu_id,
+      `${backend_url}/profile/` + user._id + "/education/" + edu_id,
       {
         school,
         startDate,
@@ -45,7 +46,7 @@ const EditEducation = () => {
   useEffect(() => {
     const getEducation = async () => {
       const res = await axios.get(
-        "http://localhost:3000/profile/" + user_id + "/education/" + edu_id
+        `${backend_url}/profile/` + user_id + "/education/" + edu_id
       );
       setEducation(res.data);
     };

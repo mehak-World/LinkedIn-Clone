@@ -3,8 +3,9 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { io } from "socket.io-client";
 import linkifyIcon from "../assets/linkify_icon.png";
+import { backend_url } from "../utils/app";
 
-const socket = io("http://localhost:3000");
+const socket = io(`${backend_url}`);
 
 const MainNav = () => {
   const location = useLocation();
@@ -28,7 +29,7 @@ const MainNav = () => {
   useEffect(() => {
     const getNotifications = async () => {
       const res = await axios.get(
-        "http://localhost:3000/profile/" + user?._id + "/notifications"
+        `${backend_url}/profile/` + user?._id + "/notifications"
       );
       if (res) {
         console.log(res.data);
@@ -39,7 +40,7 @@ const MainNav = () => {
 
     const getMessages = async () => {
       const res = await axios.get(
-        "http://localhost:3000/messages/" + user?._id
+        `${backend_url}/messages/` + user?._id
       );
       if (res) {
         console.log(res.data);
@@ -74,7 +75,7 @@ const MainNav = () => {
     if (query.length > 0) {
       const fetchUsers = async () => {
         const res = await axios.get(
-          `http://localhost:3000/search-users?query=${query}`
+          `${backend_url}/search-users?query=${query}`
         );
         setSuggestions(res.data);
       };

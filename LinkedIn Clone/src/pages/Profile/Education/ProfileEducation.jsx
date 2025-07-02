@@ -4,6 +4,7 @@ import Card from "../../../components/Card";
 import { formatDate } from "../../../utils/profile";
 import { getProfile } from "../../../utils/profile";
 import axios from "axios"
+import { backend_url } from "../../../utils/app";
 
 
 const ProfileEducation = ({ user_id, id, profile, setProfile }) => {
@@ -22,7 +23,7 @@ const ProfileEducation = ({ user_id, id, profile, setProfile }) => {
 
   const handleDeleteEdu = async (edu_id) => {
     const res = await axios.post(
-      `http://localhost:3000/profile/${user_id}/education/${edu_id}/delete`
+      `${backend_url}/profile/${user_id}/education/${edu_id}/delete`
     );
 
     if (res) {

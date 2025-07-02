@@ -14,6 +14,7 @@ import ProfileExperience from "./Experience/ProfileExperience";
 import ProfileEducation from "./Education/ProfileEducation";
 import ActivitySection from "./ActivitySection";
 import { getUser } from "../../utils/user";
+import { backend_url } from "../../utils/app";
 
 const Profile = () => {
   const [profile, setProfile] = useState("");
@@ -58,7 +59,7 @@ const Profile = () => {
   // Handle file selection
   useEffect(() => {
     const getProfile = async () => {
-      const res = await axios.get("http://localhost:3000/users/" + id);
+      const res = await axios.get(`${backend_url}/users/` + id);
       console.log(res);
       if (res.data) {
         setUsername(res.data.username)

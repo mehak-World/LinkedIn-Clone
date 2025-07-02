@@ -3,6 +3,7 @@ import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import MainNav from "../../components/MainNav";
 import parse from "html-react-parser";
+import { backend_url } from "../../utils/app";
 
 const AIGenerate = () => {
   const [keywords, setKeywords] = useState("");
@@ -16,7 +17,7 @@ const AIGenerate = () => {
     if (!keywords.trim()) return;
     setLoading(true);
     try {
-      const res = await axios.post("http://localhost:3000/posts/ai/create", {
+      const res = await axios.post(`${backend_url}/posts/ai/create`, {
         keywords,
       });
       console.log("Generate post: ", res.data);
@@ -31,7 +32,7 @@ const AIGenerate = () => {
   const handleApprove = async () => {
     // Save to db
     if (user) {
-      const res = await axios.post("http://localhost:3000/posts/save", {
+      const res = await axios.post(`${backend_url}/posts/save`, {
         content: generatedPost.content,
         image_url: generatedPost.image_url,
         public_id: generatedPost.public_id,

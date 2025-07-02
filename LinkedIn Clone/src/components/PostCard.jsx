@@ -3,6 +3,7 @@ import axios from "axios";
 import Comment from "./Comment.jsx";
 import { Link } from "react-router-dom";
 import parse from 'html-react-parser';
+import { backend_url } from "../utils/app.js";
 
 const PostCard = ({ post }) => {
   const [showComments, setShowComments] = useState(false);
@@ -17,7 +18,7 @@ const PostCard = ({ post }) => {
     setComments([...comments, { content: comment, author: user }]);
     setComment("");
 
-    await axios.post("http://localhost:3000/posts/comment", {
+    await axios.post(`${backend_url}/posts/comment`, {
       postId: post._id,
       content: comment,
       author: user._id,
@@ -41,7 +42,7 @@ const PostCard = ({ post }) => {
 
     // Send update to backend
     try {
-      await axios.post("http://localhost:3000/posts/like", {
+      await axios.post(`${backend_url}/posts/like`, {
         postId: post._id,
         new_peopleLiked,
       });

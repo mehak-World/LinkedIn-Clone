@@ -1,14 +1,15 @@
 import axios from "axios"
+import { backend_url } from "./app";
 
 export const getProfile = async (id, setProfile) => {
-  const res = await axios.get("http://localhost:3000/profile/" + id);
+  const res = await axios.get(`${backend_url}/profile/` + id);
    const profile = res.data;
   setProfile(profile);
   return res.data;
 }
 
 export const getBio = async (id, setTitle, setCity, setCountry) => {
-   const res = await axios.get("http://localhost:3000/profile/" + id);
+   const res = await axios.get(`${backend_url}/profile/` + id);
    const profile = res.data;
    console.log(profile);
 
@@ -19,7 +20,7 @@ export const getBio = async (id, setTitle, setCity, setCountry) => {
 }
 
 export const getProfileImage = async (id, image, setImage) => {
- const res = await axios.get("http://localhost:3000/profile/" + id);
+ const res = await axios.get(`${backend_url}/profile/` + id);
    const profile = res.data;
    console.log(profile);
 
@@ -27,7 +28,7 @@ export const getProfileImage = async (id, image, setImage) => {
 }
 
 export const getAbout = async (id, setAbout) => {
-    const res = await axios.get("http://localhost:3000/profile/" + id);
+    const res = await axios.get(`${backend_url}/profile/` + id);
     const profile = res.data;
     console.log(profile)
     setAbout(profile?.about);
@@ -36,7 +37,7 @@ export const getAbout = async (id, setAbout) => {
 
   export const handleConnection = async (setProfile, id, user_id) => {
   try {
-    const res = await axios.post("http://localhost:3000/connections/pending", {
+    const res = await axios.post(`${backend_url}/connections/pending`, {
       user_id: id,
       connection_id: user_id
     });
@@ -66,7 +67,7 @@ export const getExperience = async (
   setEndDate,
   setCurrentlyWorking
 ) => {
-  const res = await axios.get("http://localhost:3000/profile/" + id);
+  const res = await axios.get(`${backend_url}/profile/` + id);
   const profile = res.data;
   console.log(profile);
 
@@ -105,7 +106,7 @@ export const handleProfilePicChange = async (e, setProfile, id) => {
     formData.append("image", file);
 
     await axios.post(
-      `http://localhost:3000/profile/${id}/profilePic`,
+      `${backend_url}/profile/${id}/profilePic`,
       formData,
       {
         headers: {
@@ -131,7 +132,7 @@ export const handleProfilePicChange = async (e, setProfile, id) => {
     const formData = new FormData();
     formData.append("image", file); 
 
-    await axios.post(`http://localhost:3000/profile/${id}/bgImage`, formData, {
+    await axios.post(`${backend_url}/${id}/bgImage`, formData, {
       headers: {
         "Content-Type": "multipart/form-data",
       },

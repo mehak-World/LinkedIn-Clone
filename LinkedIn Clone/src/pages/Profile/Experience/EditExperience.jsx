@@ -3,6 +3,7 @@ import MainNav from "../../../components/MainNav";
 import axios from "axios";
 import { useNavigate, useParams } from "react-router-dom";
 import { getExperience } from "../../../utils/profile";
+import { backend_url } from "../../../utils/app";
 
 const EditExperience = () => {
   const [position, setPosition] = useState("");
@@ -26,7 +27,7 @@ const EditExperience = () => {
     e.preventDefault();
     try {
       const response = await axios.post(
-        `http://localhost:3000/profile/${user_id}/experience/${exp_id}`,
+        `${backend_url}/profile/${user_id}/experience/${exp_id}`,
         {
           position,
           company,

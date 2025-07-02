@@ -6,6 +6,7 @@ import CreatePost from "../../components/CreatePost.jsx";
 import axios from "axios";
 import { getUser } from "../../utils/user.js";
 import { useNavigate } from "react-router-dom";
+import { backend_url } from "../../utils/app.js";
 
 const Feed = () => {
   const [posts, setPosts] = useState([]);
@@ -35,7 +36,7 @@ const Feed = () => {
   }, [user?._id]);
 
   const getAllPosts = async () => {
-    const result = await axios.get("http://localhost:3000/posts/all");
+    const result = await axios.get(`${backend_url}/posts/all`);
     setPosts(shuffleArray(result.data));
   };
 

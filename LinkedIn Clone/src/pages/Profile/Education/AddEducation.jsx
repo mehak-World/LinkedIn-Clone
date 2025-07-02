@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import MainNav from "../../../components/MainNav";
 import axios from "axios"
 import { useNavigate } from "react-router-dom";
+import { backend_url } from "../../../utils/app";
 
 const Education = () => {
   const [currentlyStudying, setCurrentlyStudying] = useState(false);
@@ -18,7 +19,7 @@ const Education = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const response = await axios.post("http://localhost:3000/profile/" + user._id + "/education", {school, startDate, endDate, currentlyStudying, city, country, description, fieldOfStudy})
+    const response = await axios.post(`${backend_url}/profile/` + user._id + "/education", {school, startDate, endDate, currentlyStudying, city, country, description, fieldOfStudy})
     if(response){
         navigate("/profile/"  + user._id)
     }

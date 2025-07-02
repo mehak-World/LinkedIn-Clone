@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
+import { backend_url } from "../../utils/app";
 
 // Helper to strip HTML and return plain text
 const stripHtml = (html) => {
@@ -14,7 +15,7 @@ const ActivitySection = ({ id }) => {
   useEffect(() => {
     const fetchUserPosts = async () => {
       try {
-        const res = await axios.get("http://localhost:3000/posts/" + id);
+        const res = await axios.get(`${backend_url}/posts/` + id);
         setPosts(res.data);
       } catch (err) {
         console.error("Failed to fetch posts:", err);
@@ -26,7 +27,7 @@ const ActivitySection = ({ id }) => {
 
   const handleDelete = async (postId) => {
     try {
-      await axios.post(`http://localhost:3000/posts/${postId}/delete`);
+      await axios.post(`${backend_url}/posts/${postId}/delete`);
       setPosts((prev) => prev.filter((post) => post._id !== postId));
     } catch (err) {
       console.error("Failed to delete post:", err);

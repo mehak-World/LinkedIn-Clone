@@ -3,6 +3,7 @@ import MainNav from "../../components/MainNav.jsx";
 import Card from "../../components/Card.jsx";
 import axios from "axios";
 import { ToastContainer, toast } from "react-toastify";
+import { backend_url } from "../../utils/app.js";
 
 const Notification = () => {
   const user = JSON.parse(localStorage.getItem("user"));
@@ -11,7 +12,7 @@ const Notification = () => {
 
   useEffect(() => {
     const readAllNotifs = async () => {
-      await axios.post("http://localhost:3000/connections/readNotif", {user_id: user?._id})
+      await axios.post(`${backend_url}/connections/readNotif`, {user_id: user?._id})
     }
     if(user){
           readAllNotifs();
@@ -22,7 +23,7 @@ const Notification = () => {
   useEffect(() => {
     const getNotifications = async () => {
       const res = await axios.get(
-        "http://localhost:3000/profile/" + user?._id + "/notifications"
+        `${backend_url}/profile/` + user?._id + "/notifications"
       );
       if (res) {
         console.log(res.data);
@@ -47,7 +48,7 @@ const Notification = () => {
   }
 
     const handleReject = async (id) => {
-    const res = await axios.post("http://localhost:3000/connections/reject" , {user_id: user?._id, connection_id: id });
+    const res = await axios.post(`${backend_url}/connections/reject` , {user_id: user?._id, connection_id: id });
       if (res) {
         const notify = () => toast("Connection ignored");
         notify()
@@ -57,7 +58,7 @@ const Notification = () => {
 
 
   const handleNotifDelete = async (notif_id) => {
-      const res = await axios.post("http://localhost:3000/connections/notif/delete", {user_id: user?._id, notif_id})
+      const res = await axios.post(`${backend_url}/connections/notif/delete`, {user_id: user?._id, notif_id})
       if(res){
         setRefresh(!refresh)
       }

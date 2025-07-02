@@ -3,6 +3,7 @@ import MainNav from "../../components/MainNav";
 import axios from "axios"
 import { useNavigate } from "react-router-dom";
 import { getBio } from "../../utils/profile";
+import { backend_url } from "../../utils/app";
 
 const Bio = () => {
     const [title, setTitle] = useState("")
@@ -19,7 +20,7 @@ const Bio = () => {
 
     const handleSubmit = async (e) => {
             e.preventDefault();
-            const response =  await axios.post("http://localhost:3000/profile/" + user._id +"/bio", {title, city, country});
+            const response =  await axios.post(`${backend_url}/profile/` + user._id +"/bio", {title, city, country});
             if(response.data){
                 navigate("/profile/" + user._id);
             }

@@ -2,6 +2,7 @@ import React, { useContext, useState } from "react";
 import { UserContext } from "../utils/UserContext";
 import { useNavigate } from "react-router-dom";
 import MainNav from "../components/MainNav";
+import { backend_url } from "../utils/app";
 
 const CreatePost = () => {
   const token = localStorage.getItem("token");
@@ -28,7 +29,7 @@ const CreatePost = () => {
     formData.append("userId", user._id);
     images.forEach((img) => formData.append("images", img)); 
 
-    const res = await fetch("http://localhost:3000/posts/create", {
+    const res = await fetch(`${backend_url}/posts/create`, {
       method: "POST",
       headers: {
         Authorization: `Bearer ${token}`,

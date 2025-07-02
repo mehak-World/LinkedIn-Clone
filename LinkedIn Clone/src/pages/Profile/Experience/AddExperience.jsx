@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import MainNav from "../../../components/MainNav";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import { backend_url } from "../../../utils/app";
 
 const Experience = () => {
   const [position, setPosition] = useState("");
@@ -20,7 +21,7 @@ const Experience = () => {
     e.preventDefault();
     try {
       const response = await axios.post(
-        `http://localhost:3000/profile/${user._id}/experience`,
+        `${backend_url}/profile/${user._id}/experience`,
         {
           position,
           company,

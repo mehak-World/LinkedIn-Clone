@@ -1,4 +1,5 @@
 import axios from "axios";
+import { backend_url } from "./app";
 
 export const signUp = async (
   email,
@@ -8,7 +9,7 @@ export const signUp = async (
   navigate
 ) => {
   try {
-    const response = await axios.post("http://localhost:3000/auth/sign-up", {
+    const response = await axios.post(`${backend_url}/auth/sign-up`, {
       email,
       name,
       password,
@@ -32,7 +33,7 @@ export const signIn = async ( email,
   toast,
   navigate) => {
      try{
-        const response = await axios.post("http://localhost:3000/auth/sign-in", {email, password});
+        const response = await axios.post(`${backend_url}/auth/sign-in`, {email, password});
         if(response && response.data.message){
           localStorage.setItem("token", response.data.token)
           localStorage.setItem("user", JSON.stringify(response.data.user));

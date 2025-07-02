@@ -4,7 +4,6 @@ import GoogleAuth from "./GoogleAuth";
 
 
 const HomeBody = () => {
-  const navigate = useNavigate();
   return (
     <div className="flex flex-col items-center justify-center gap-4 m-[6%]">
       <div className = "flex flex-col justify-center items-center mt-[5%]">

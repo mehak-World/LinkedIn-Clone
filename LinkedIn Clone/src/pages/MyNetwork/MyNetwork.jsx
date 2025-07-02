@@ -3,6 +3,7 @@ import MainNav from '../../components/MainNav';
 import axios from 'axios';
 import ConnectionCard from './ConnectionCard';
 import { ToastContainer, toast } from 'react-toastify';
+import { backend_url } from '../../utils/app';
 
 const MyNetwork = () => {
   const [active, setActive] = useState("friends");
@@ -12,7 +13,7 @@ const MyNetwork = () => {
 
   useEffect(() => {
     const getConnections = async () => {
-      const res = await axios.get("http://localhost:3000/connections/" + user?._id);
+      const res = await axios.get(`${backend_url}/connections/` + user?._id);
       if (res) {
         setConnections(res.data.connections);
         setPending(res.data.pendingRequests);
@@ -26,7 +27,7 @@ const MyNetwork = () => {
   }, [active]);
 
   const handleAccept = async (id) => {
-    const res = await axios.post("http://localhost:3000/connections/accept" , {user_id: user?._id, connection_id: id });
+    const res = await axios.post(`${backend_url}/connections/accept` , {user_id: user?._id, connection_id: id });
       if (res) {
         setConnections(res.data.connections);
         setPending(res.data.pendingRequests);
@@ -37,7 +38,7 @@ const MyNetwork = () => {
 
 
   const handleReject = async (id) => {
-    const res = await axios.post("http://localhost:3000/connections/reject" , {user_id: user?._id, connection_id: id });
+    const res = await axios.post(`${backend_url}/connections/reject` , {user_id: user?._id, connection_id: id });
       if (res) {
         setConnections(res.data.connections);
         setPending(res.data.pendingRequests);

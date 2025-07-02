@@ -6,8 +6,9 @@ import Card from "../../components/Card.jsx";
 import { useLocation, useNavigate } from "react-router-dom";
 import { getUser } from "../../utils/user.js";
 import axios from "axios";
+import { backend_url } from "../../utils/app.js";
 
-const socket = io("http://localhost:3000");
+const socket = io(`${backend_url}`);
 
 const Message = () => {
   const navigate = useNavigate();
@@ -42,7 +43,7 @@ const Message = () => {
   }, []);
 
   const handleChangeConn = async (conn_id) => {
-    await axios.post("http://localhost:3000/messages/readMsg", {
+    await axios.post(`${backend_url}/messages/readMsg`, {
       user_id: user?._id,
       conn_id: conn_id,
     });
@@ -60,7 +61,7 @@ const Message = () => {
       msg: message,
     });
     // Send to backend to store in DB
-    await axios.post("http://localhost:3000/messages", {
+    await axios.post(`${backend_url}/messages`, {
         sender_id: senderId,
         receiver_id: receiverId,
         msg: message,
@@ -82,7 +83,7 @@ const Message = () => {
   useEffect(() => {
     const fetchConnections = async () => {
       const res = await fetch(
-        `http://localhost:3000/messages/connections/${user?._id}`
+        `${backend_url}/messages/connections/${user?._id}`
       );
       const data = await res.json();
       setConnections(data);
@@ -100,7 +101,7 @@ const Message = () => {
         if (!receiverId || connections.find((c) => c._id === receiverId))
           return;
 
-        const res = await fetch(`http://localhost:3000/users/${receiverId}`);
+        const res = await fetch(`${backend_url}/users/${receiverId}`);
         const data = await res.json();
         setConnections((prev) => [...prev, data]);
       } catch (err) {
@@ -138,7 +139,7 @@ const Message = () => {
   useEffect(() => {
     const fetchMessages = async () => {
       const res = await fetch(
-        `http://localhost:3000/messages?sender_id=${user?._id}&receiver_id=${receiverId}`
+        `${backend_url}/messages?sender_id=${user?._id}&receiver_id=${receiverId}`
       );
       const data = await res.json();
       

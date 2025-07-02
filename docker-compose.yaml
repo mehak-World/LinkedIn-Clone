@@ -1,0 +1,31 @@
+
+services:
+  backend:
+    build:
+      context: ./backend
+    container_name: linkifybackend
+    ports:
+      - "3000:3000"
+    env_file:
+      - ./backend/.env
+    restart: always
+    networks:
+      - linkify-net
+
+  frontend:
+    build:
+      context:  "./LinkedIn Clone"
+      args:
+        VITE_BACKEND_URL: "https://linkify-backend-goe4.onrender.com"
+    container_name: linkify-frontend
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+    restart: always
+    networks:
+      - linkify-net
+
+networks:
+  linkify-net:
+    driver: bridge

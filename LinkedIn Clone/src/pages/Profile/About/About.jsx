@@ -3,6 +3,7 @@ import MainNav from "../../../components/MainNav";
 import axios from "axios"
 import { useNavigate } from "react-router-dom";
 import { getAbout } from "../../../utils/profile";
+import { backend_url } from "../../../utils/app";
 
 const About = () => {
 
@@ -18,7 +19,7 @@ const About = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         if(user){
-            const response =  await axios.post("http://localhost:3000/profile/" + user._id + "/about", {about});
+            const response =  await axios.post(`${backend_url}/profile/` + user._id + "/about", {about});
            console.log(response);
             if(response.data){
                 navigate("/profile/" + user._id);

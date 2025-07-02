@@ -4,6 +4,7 @@ import { jwtDecode } from "jwt-decode";
 import {  toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
 import axios from "axios"
+import { backend_url } from "../utils/app";
 
 const GoogleAuth = () => {
   const navigate = useNavigate();
@@ -22,7 +23,7 @@ const GoogleAuth = () => {
             };
 
             axios
-              .post("http://localhost:3000/auth/google-signin", googleUser)
+              .post(`${backend_url}/auth/google-signin`, googleUser)
               .then((res) => {
                 localStorage.setItem("token", res.data.token);
                 localStorage.setItem("user", JSON.stringify(res.data.user));
