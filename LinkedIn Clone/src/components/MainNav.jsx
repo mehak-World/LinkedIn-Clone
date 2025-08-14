@@ -4,6 +4,7 @@ import axios from "axios";
 import { io } from "socket.io-client";
 import linkifyIcon from "../assets/linkify_icon.png";
 import { backend_url } from "../utils/app";
+import { FaBars, FaTimes } from "react-icons/fa";
 
 const socket = io(`${backend_url}`);
 
@@ -12,83 +13,59 @@ const MainNav = () => {
   const navigate = useNavigate();
   const user = JSON.parse(localStorage.getItem("user"));
   const [active, setActive] = useState("Home");
-  const [unreadNotifCount, setUnreadNotifCount] = useState(0);
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [unreadNotifCount, setUnreadNotifCount] = useState(0);
   const [unreadMsgCount, setUnreadMsgCount] = useState(0);
-
-  useEffect(() => {
-    if (!user) {
-      navigate("/");
-    }
-  });
-
-  // For search
   const [query, setQuery] = useState("");
   const [suggestions, setSuggestions] = useState([]);
 
   useEffect(() => {
-    const getNotifications = async () => {
-      const res = await axios.get(
-        `${backend_url}/profile/` + user?._id + "/notifications"
-      );
-      if (res) {
-        console.log(res.data);
-        const unread_notif = res.data.filter((notif) => !notif?.read);
-        setUnreadNotifCount(unread_notif.length);
-      }
-    };
+    if (!user) navigate("/");
+  }, [user, navigate]);
 
-    const getMessages = async () => {
-      const res = await axios.get(
-        `${backend_url}/messages/` + user?._id
-      );
-      if (res) {
-        console.log(res.data);
-        const unread_msg = res.data.filter((msg) => !msg?.read);
-        console.log(unread_msg);
-        setUnreadMsgCount(unread_msg.length);
-      }
-    };
-
-    if (user) {
-      getNotifications();
-      getMessages();
-    }
-  }, []);
-
+  // Fetch notifications & messages
   useEffect(() => {
-    if (user?._id) {
-      socket.emit("join", user._id);
-    }
+    if (!user) return;
 
-    socket.on("notify", (data) => {
-      console.log("New notification:", data);
-      setUnreadNotifCount((prev) => prev + 1);
-    });
-
-    return () => {
-      socket.off("notify");
+    const getNotifications = async () => {
+      const res = await axios.get(`${backend_url}/profile/${user._id}/notifications`);
+      const unread = res.data.filter(n => !n.read);
+      setUnreadNotifCount(unread.length);
     };
+    const getMessages = async () => {
+      const res = await axios.get(`${backend_url}/messages/${user._id}`);
+      const unread = res.data.filter(m => !m.read);
+      setUnreadMsgCount(unread.length);
+    };
+
+    getNotifications();
+    getMessages();
+  }, [user]);
+
+  // Socket for real-time notifications
+  useEffect(() => {
+    if (user?._id) socket.emit("join", user._id);
+
+    socket.on("notify", () => setUnreadNotifCount(prev => prev + 1));
+    return () => socket.off("notify");
   }, [user?._id]);
 
+  // Search users
   useEffect(() => {
-    if (query.length > 0) {
-      const fetchUsers = async () => {
-        const res = await axios.get(
-          `${backend_url}/search-users?query=${query}`
-        );
-        setSuggestions(res.data);
-      };
-      fetchUsers();
-    } else {
-      setSuggestions([]);
-    }
+    if (!query) return setSuggestions([]);
+    const fetchUsers = async () => {
+      const res = await axios.get(`${backend_url}/search-users?query=${query}`);
+      setSuggestions(res.data);
+    };
+    fetchUsers();
   }, [query]);
 
   const handleSelect = (id) => {
     setQuery("");
     setSuggestions([]);
     navigate(`/profile/${id}`);
+    setMobileMenuOpen(false);
   };
 
   useEffect(() => {
@@ -104,126 +81,82 @@ const MainNav = () => {
     setActive(pathMap[location.pathname] || "");
   }, [location.pathname, user?._id]);
 
+  const navItems = [
+    { name: "Home", path: "/feed", icon: "fa-solid fa-house" },
+    { name: "My Network", path: "/my-network", icon: "fa-solid fa-address-book" },
+    { name: "Messages", path: "/messages", icon: "fa-solid fa-message", badge: unreadMsgCount },
+    { name: "Notification", path: "/notifications", icon: "fa-solid fa-bell", badge: unreadNotifCount },
+    { name: "Explore AI", path: "/aiGenerate", icon: "fa-solid fa-hexagon-nodes-bolt" },
+  ];
+
   return (
-    <div className="flex justify-between mx-20 my-5 relative">
-      <div className="flex gap-2 items-center relative">
-        <img src = {linkifyIcon} alt = "site icon" className = "h-15 w-15" />
-        <div className="relative">
-          <input
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            placeholder="Search"
-            className="border rounded-2xl p-2 w-72"
-          />
-          {suggestions.length > 0 && (
-            <ul className="absolute top-10 left-0 w-full bg-white border rounded-lg shadow z-50">
-              {suggestions.map((user) => (
-                <li
-                  key={user?._id}
-                  className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
-                  onClick={() => handleSelect(user?._id)}
-                >
-                  {user?.username}
-                </li>
-              ))}
-            </ul>
-          )}
+    <nav className="bg-white shadow-md sticky top-0 z-50">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 flex justify-between items-center h-16">
+        {/* Logo */}
+        <div className="flex items-center gap-2">
+          <img src={linkifyIcon} alt="site icon" className="h-10 w-10" />
+          <div className="relative">
+            <input
+              value={query}
+              onChange={e => setQuery(e.target.value)}
+              placeholder="Search"
+              className="border rounded-2xl p-2 w-40 sm:w-64 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+            {suggestions.length > 0 && (
+              <ul className="absolute top-10 left-0 w-full bg-white border rounded-lg shadow z-50 max-h-60 overflow-y-auto">
+                {suggestions.map(u => (
+                  <li
+                    key={u._id}
+                    className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
+                    onClick={() => handleSelect(u._id)}
+                  >
+                    {u.username}
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
         </div>
-      </div>
 
-      <div>
-        <ul className="flex gap-6 items-center text-gray-500 text-[14px] cursor-pointer">
-          <Link to="/feed">
-            <div
-              className={`flex flex-col justify-center items-center gap-2 ${
-                active === "Home"
-                  ? "text-black border-b-2 border-black"
-                  : "text-gray-500"
-              }`}
-              onClick={() => setActive("Home")}
-            >
-              <i className="fa-solid fa-house"></i>
-              <li>Home</li>
-            </div>
-          </Link>
-
-          <Link to="/my-network">
-            <div
-              className={`flex flex-col justify-center items-center gap-2 ${
-                active === "My Network"
-                  ? "text-black border-b-2 border-black"
-                  : "text-gray-500"
-              }`}
-              onClick={() => setActive("My Network")}
-            >
-              <i className="fa-solid fa-address-book"></i>
-              <li>My Network</li>
-            </div>
-          </Link>
-
-          <Link to="/messages">
-            <div
-              className={`relative flex flex-col justify-center items-center gap-2 ${
-                active === "Messages"
-                  ? "text-black border-b-2 border-black"
-                  : "text-gray-500"
-              }`}
-              onClick={() => setActive("Messages")}
-            >
-              <i className="fa-solid fa-message">
-                {unreadMsgCount > 0 && (
+        {/* Desktop Menu */}
+        <ul className="hidden md:flex gap-6 items-center text-gray-500 text-sm">
+          {navItems.map(item => (
+            <Link key={item.name} to={item.path}>
+              <div
+                className={`relative flex flex-col justify-center items-center gap-1 cursor-pointer ${
+                  active === item.name ? "text-black border-b-2 border-black" : ""
+                }`}
+                onClick={() => setActive(item.name)}
+              >
+                <i className={`${item.icon} text-lg`}></i>
+                <span>{item.name}</span>
+                {item.badge > 0 && (
                   <span className="absolute -top-2 -right-2 bg-red-600 text-white text-xs px-1.5 py-0.5 rounded-full">
-                    {unreadMsgCount}
+                    {item.badge}
                   </span>
                 )}
-              </i>
-              <li>Messages</li>
-            </div>
-          </Link>
+              </div>
+            </Link>
+          ))}
 
-          <Link to="/notifications">
-            <div
-              className={`relative flex flex-col justify-center items-center gap-2 ${
-                active === "Notification"
-                  ? "text-black border-b-2 border-black"
-                  : "text-gray-500"
-              }`}
-              onClick={() => setActive("Notification")}
-            >
-              <i className="fa-solid fa-bell text-lg relative">
-                {unreadNotifCount > 0 && (
-                  <span className="absolute -top-2 -right-2 bg-red-600 text-white text-xs px-1.5 py-0.5 rounded-full">
-                    {unreadNotifCount}
-                  </span>
-                )}
-              </i>
-              <li>Notification</li>
-            </div>
-          </Link>
-
+          {/* User Dropdown */}
           <div className="relative">
             <div
-              className={`flex flex-col justify-center items-center gap-2 cursor-pointer ${
-                active === "Me"
-                  ? "text-black border-b-2 border-black"
-                  : "text-gray-500"
+              className={`flex flex-col justify-center items-center gap-1 cursor-pointer ${
+                active === "Me" ? "text-black border-b-2 border-black" : ""
               }`}
               onClick={() => setDropdownOpen(!dropdownOpen)}
             >
-              <i className="fa-solid fa-user"></i>
-              <li>Me</li>
+              <i className="fa-solid fa-user text-lg"></i>
+              <span>Me</span>
             </div>
-
             {dropdownOpen && (
               <ul className="absolute right-0 mt-2 bg-white border rounded-md shadow-lg z-10 min-w-[120px]">
                 <li>
                   <Link
-                    to={`/profile/${user?._id}`}
+                    to={`/profile/${user._id}`}
                     className="block px-4 py-2 hover:bg-gray-100"
-                    onClick={() => {
-                      setDropdownOpen(false);
-                      setActive("Me");
-                    }}
+                    onClick={() => setDropdownOpen(false)}
                   >
                     Profile
                   </Link>
@@ -244,23 +177,60 @@ const MainNav = () => {
               </ul>
             )}
           </div>
-
-          <Link to="/aiGenerate">
-            <div
-              className={`flex flex-col justify-center items-center gap-2 ${
-                active === "Explore AI"
-                  ? "text-black border-b-2 border-black"
-                  : "text-gray-500"
-              }`}
-              onClick={() => setActive("Explore AI")}
-            >
-              <i className="fa-solid fa-hexagon-nodes-bolt"></i>
-              <li>Explore AI</li>
-            </div>
-          </Link>
         </ul>
+
+        {/* Mobile Menu Button */}
+        <div className="md:hidden">
+          <button onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
+            {mobileMenuOpen ? <FaTimes size={24} /> : <FaBars size={24} />}
+          </button>
+        </div>
       </div>
-    </div>
+
+      {/* Mobile Menu */}
+      {mobileMenuOpen && (
+        <ul className="md:hidden flex flex-col gap-2 bg-white border-t p-4 text-gray-700">
+          {navItems.map(item => (
+            <Link key={item.name} to={item.path}>
+              <li
+                className={`flex items-center gap-2 px-2 py-2 rounded hover:bg-gray-100 ${
+                  active === item.name ? "bg-gray-200 font-semibold" : ""
+                }`}
+                onClick={() => setActive(item.name)}
+              >
+                <i className={`${item.icon}`}></i> {item.name}
+                {item.badge > 0 && (
+                  <span className="ml-auto bg-red-600 text-white text-xs px-1.5 py-0.5 rounded-full">
+                    {item.badge}
+                  </span>
+                )}
+              </li>
+            </Link>
+          ))}
+
+          <li className="border-t mt-2 pt-2">
+            <Link
+              to={`/profile/${user._id}`}
+              className="block px-2 py-2 hover:bg-gray-100"
+              onClick={() => setMobileMenuOpen(false)}
+            >
+              Profile
+            </Link>
+            <button
+              className="w-full text-left px-2 py-2 hover:bg-gray-100"
+              onClick={() => {
+                localStorage.removeItem("user");
+                localStorage.removeItem("token");
+                setMobileMenuOpen(false);
+                navigate("/");
+              }}
+            >
+              Logout
+            </button>
+          </li>
+        </ul>
+      )}
+    </nav>
   );
 };
 

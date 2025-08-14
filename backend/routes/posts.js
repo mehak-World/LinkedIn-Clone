@@ -120,6 +120,7 @@ router.post("/ai/create", upload.single("image"), async (req, res) => {
     contents: `Generate an interesting post for platform Like LinkedIn on ${keywords}. Do not include the top sentence "Here is the content..", just directly start with the content`,
   });
   const htmlContent = marked.parse(response.text);
+  console.log(htmlContent);
   // Generate image using keywords
   const image_url = await generateImage(keywords);
 

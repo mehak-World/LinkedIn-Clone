@@ -17,7 +17,7 @@ const generateImage = async (keywords) => {
     config: {
       responseModalities: [Modality.TEXT, Modality.IMAGE],
     },
-  });
+});
 
   for (const part of response.candidates[0].content.parts) {
     if (part.text) {

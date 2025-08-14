@@ -1,42 +1,36 @@
 import React from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import GoogleAuth from "./GoogleAuth";
-
 
 const HomeBody = () => {
   return (
-    <div className="flex flex-col items-center justify-center gap-4 m-[6%]">
-      <div className = "flex flex-col justify-center items-center mt-[5%]">
-        <h1 className="text-4xl text-gray-500">
+    <div className="flex flex-col items-center justify-center min-h-screen gap-6 px-4 py-10 md:py-20 md:px-6 bg-gray-50">
+      <div className="flex flex-col justify-center items-center w-full max-w-md md:max-w-xl lg:max-w-2xl bg-white rounded-xl shadow-lg p-6 md:p-10">
+        <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-700 text-center mb-6">
           Welcome to the Professional Community
         </h1>
-        <div>
-          <div className = "p-2 m-5">
-              <GoogleAuth />
+
+        <div className="flex flex-col gap-4 w-full">
+          <div className="flex justify-center">
+            <GoogleAuth />
           </div>
-          
-          <Link to="/sign-in/false">
-            <button className="w-100 border-2 border-black p-2 rounded-2xl mx-4 my-1 cursor-pointer">
-              {" "}
-              Sign In With Email{" "}
+
+          <Link to="/sign-in/false" className="w-full">
+            <button className="w-full border border-gray-400 bg-gray-50 hover:bg-gray-100 p-3 rounded-xl font-medium transition-colors duration-200">
+              Sign In With Email
             </button>
           </Link>
-          <br />
         </div>
-        <p className="my-10">
+
+        <p className="mt-8 text-center text-gray-600 text-sm sm:text-base md:text-base">
           New to LinkedIn?{" "}
           <Link to="/sign-in/true">
-            <button className="text-blue-700 cursor-pointer">Join Now</button>
+            <button className="text-blue-600 hover:underline font-semibold">
+              Join Now
+            </button>
           </Link>
         </p>
       </div>
-      {/* <div>
-        <img
-          className="w-[500px] h-[400px]"
-          src={linkifyIcon}
-          alt=""
-        />
-      </div> */}
     </div>
   );
 };

@@ -1,60 +1,57 @@
-import axios from "axios"
+import axios from "axios";
 import { backend_url } from "./app";
 
-export const getProfile = async (id, setProfile) => {
+// Fetch profile by user ID
+export const getProfile = async (id, setProfileUser) => {
   const res = await axios.get(`${backend_url}/profile/` + id);
-   const profile = res.data;
-  setProfile(profile);
+  setProfileUser(res.data);
   return res.data;
-}
+};
 
+// Fetch bio info
 export const getBio = async (id, setTitle, setCity, setCountry) => {
-   const res = await axios.get(`${backend_url}/profile/` + id);
-   const profile = res.data;
-   console.log(profile);
+  const res = await axios.get(`${backend_url}/profile/` + id);
+  const profile = res.data;
+  setTitle(profile?.profileTitle || "");
+  setCity(profile?.city || "");
+  setCountry(profile?.country || "");
+};
 
-   setTitle(profile?.profileTitle || "")
-   setCity(profile?.city || "")
-   setCountry(profile?.country || "")
-
-}
-
+// Fetch profile image
 export const getProfileImage = async (id, image, setImage) => {
- const res = await axios.get(`${backend_url}/profile/` + id);
-   const profile = res.data;
-   console.log(profile);
+  const res = await axios.get(`${backend_url}/profile/` + id);
+  const profile = res.data;
+  setImage(profile?.profilePic || image);
+};
 
-   setImage(profile?.profilePic || image)
-}
-
+// Fetch about info
 export const getAbout = async (id, setAbout) => {
-    const res = await axios.get(`${backend_url}/profile/` + id);
-    const profile = res.data;
-    console.log(profile)
-    setAbout(profile?.about);
-}
+  const res = await axios.get(`${backend_url}/profile/` + id);
+  setAbout(res.data?.about);
+};
 
-
-  export const handleConnection = async (setProfile, id, user_id) => {
+// Handle connection requests
+export const handleConnection = async (setProfileUser, id, user_id) => {
   try {
     const res = await axios.post(`${backend_url}/connections/pending`, {
       user_id: id,
-      connection_id: user_id
+      connection_id: user_id,
     });
     console.log(res);
 
-    // Immediately update the state to show "Pending"
-    setProfile((prevProfile) => ({
-      ...prevProfile,
-      pendingRequests: [...(prevProfile.pendingRequests || []), user_id]
+    setProfileUser((prev) => ({
+      ...prev,
+      profile: {
+        ...prev.profile,
+        pendingRequests: [...(prev.profile.pendingRequests || []), user_id],
+      },
     }));
   } catch (err) {
     console.error("Failed to send connection request:", err);
   }
 };
 
-
-
+// Fetch experience by ID
 export const getExperience = async (
   id,
   exp_id,
@@ -69,13 +66,8 @@ export const getExperience = async (
 ) => {
   const res = await axios.get(`${backend_url}/profile/` + id);
   const profile = res.data;
-  console.log(profile);
-
-  const experiences = profile.experience.filter((exp) => exp._id == exp_id);
-  console.log(experiences);
-
-  const exp = experiences[0];
-  console.log(exp);
+  const exp = profile.experience.find((e) => e._id === exp_id);
+  if (!exp) return;
 
   setPosition(exp.position);
   setCountry(exp.country);
@@ -87,68 +79,79 @@ export const getExperience = async (
   setCurrentlyWorking(exp.current);
 };
 
-export const handleProfilePicChange = async (e, setProfile, id) => {
-    const file = e.target.files[0];
-    if (!file) return;
+// Handle profile picture change
+export const handleProfilePicChange = async (e, setProfileUser, id) => {
+  const file = e.target.files[0];
+  if (!file) return;
 
-    // Optional preview
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      setProfile((prev) => ({
-        ...prev,
-        profilePic: reader.result, 
-      }));
-    };
-    reader.readAsDataURL(file);
-
-    // Upload to backend
-    const formData = new FormData();
-    formData.append("image", file);
-
-    await axios.post(
-      `${backend_url}/profile/${id}/profilePic`,
-      formData,
-      {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      }
-    );
-  };
-
-  export  const handleFileChange = async (e, setProfile, id) => {
-    const file = e.target.files[0];
-    if (!file) return;
-
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      setProfile((prev) => ({
-        ...prev,
-        bgPic: reader.result,
-      }));
-    };
-    reader.readAsDataURL(file);
-
-    const formData = new FormData();
-    formData.append("image", file); 
-
-    await axios.post(`${backend_url}/${id}/bgImage`, formData, {
-      headers: {
-        "Content-Type": "multipart/form-data",
+  // Preview using base64
+  const reader = new FileReader();
+  reader.onloadend = () => {
+    setProfileUser((prev) => ({
+      ...prev,
+      profile: {
+        ...prev.profile,
+        profilePic: reader.result, // temporarily preview
       },
-    });
+    }));
   };
+  reader.readAsDataURL(file);
 
-  export function formatDate(dateString) {
-    if (!dateString) return "";
-    console.log(dateString);
-    const date = new Date(dateString);
-    console.log(date);
-    return date.toLocaleDateString("en-US", {
-      year: "numeric",
-      month: "short",
-      timeZone: "UTC",
-    }); 
+  // Upload to backend
+  const formData = new FormData();
+  formData.append("image", file);
+
+  const res = await axios.post(`${backend_url}/profile/${id}/profilePic`, formData, {
+    headers: { "Content-Type": "multipart/form-data" },
+  });
+
+  // After upload, update profileUser with server-returned URL
+  if (res.data?.profilePic) {
+    setProfileUser((prev) => ({
+      ...prev,
+      profile: {
+        ...prev.profile,
+        profilePic: `${backend_url}/${res.data.profilePic}`,
+      },
+    }));
   }
+};
 
- 
+
+// Handle background picture change
+export const handleFileChange = async (e, setProfileUser, id) => {
+  const file = e.target.files[0];
+  if (!file) return;
+
+  // Preview
+  const reader = new FileReader();
+  reader.onloadend = () => {
+    setProfileUser((prev) => ({
+      ...prev,
+      profile: {
+        ...prev.profile,
+        bgPic: reader.result,
+      },
+    }));
+  };
+  reader.readAsDataURL(file);
+
+  // Upload to backend
+  const formData = new FormData();
+  formData.append("image", file);
+
+  await axios.post(`${backend_url}/profile/${id}/bgImage`, formData, {
+    headers: { "Content-Type": "multipart/form-data" },
+  });
+};
+
+// Format date
+export function formatDate(dateString) {
+  if (!dateString) return "";
+  const date = new Date(dateString);
+  return date.toLocaleDateString("en-US", {
+    year: "numeric",
+    month: "short",
+    timeZone: "UTC",
+  });
+}

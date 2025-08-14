@@ -38,7 +38,7 @@ const Notification = () => {
   }, [refresh]);
 
   const handleAccept = async (notif) => {
-    const res = await axios.post("http://localhost:3000/connections/accept" , {user_id: user?._id, connection_id: notif.from });
+    const res = await axios.post(`${backend_url}/connections/accept` , {user_id: user?._id, connection_id: notif.from });
     console.log(res)  
     if (res) {
         const notify = () => toast("Connection successfully added");
@@ -104,7 +104,7 @@ const Notification = () => {
                       <button className="text-sm px-3 py-1 bg-blue-600 text-white rounded-md hover:bg-blue-700" onClick = {() => handleAccept(notif)}>
                         Accept
                       </button>
-                      <button onClick = {handleReject} className="text-sm px-3 py-1 border rounded-md text-gray-700 hover:bg-gray-100">
+                      <button onClick = {() => handleReject(notif._id)} className="text-sm px-3 py-1 border rounded-md text-gray-700 hover:bg-gray-100">
                         Ignore
                       </button>
                     </div>

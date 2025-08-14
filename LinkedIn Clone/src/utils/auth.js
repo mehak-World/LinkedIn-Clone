@@ -39,6 +39,9 @@ export const signIn = async ( email,
           localStorage.setItem("user", JSON.stringify(response.data.user));
           navigate("/feed")
         }
+        else{
+          toast.error("Could not sign-in the user");
+        }
       }
       catch(err){
         toast.error("Could not sign-in the user");

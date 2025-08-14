@@ -10,36 +10,35 @@ import { backend_url } from "../../utils/app.js";
 
 const Feed = () => {
   const [posts, setPosts] = useState([]);
-  const user = JSON.parse(localStorage.getItem("user"));
+  const [profileUser, setProfileUser] = useState(null);
   const navigate = useNavigate();
+  const user = JSON.parse(localStorage.getItem("user"));
 
- 
   useEffect(() => {
     if (!user) {
       navigate("/");
+    } else {
+      // Fetch user profile
+      const fetchProfile = async () => {
+        const data = await getUser(user._id);
+        setProfileUser(data);
+      };
+      fetchProfile();
+      fetchPosts();
     }
-  }, [user, navigate]);
- 
+  }, []);
 
-  const [profileUser, setProfileUser] = useState(null);
-
-  useEffect(() => {
-    const getProfileUser = async () => {
-      const data = await getUser(user?._id);
-      setProfileUser(data);
-    };
-
-    if(user){
-         getProfileUser();
+  // Fetch all posts
+  const fetchPosts = async () => {
+    try {
+      const res = await axios.get(`${backend_url}/posts/all`);
+      setPosts(shuffleArray(res.data));
+    } catch (err) {
+      console.error(err);
     }
-   
-  }, [user?._id]);
-
-  const getAllPosts = async () => {
-    const result = await axios.get(`${backend_url}/posts/all`);
-    setPosts(shuffleArray(result.data));
   };
 
+  // Shuffle posts
   const shuffleArray = (array) => {
     for (let i = array.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1));
@@ -48,42 +47,45 @@ const Feed = () => {
     return array;
   };
 
-  useEffect(() => {
-    if(user){
-        getAllPosts();
-    }
-    
-  }, []);
-
   return (
-    <div>
-      <div>
-        <MainNav />
-      </div>
-      <div className="h-[100%] px-5 py-9 xl:px-50 flex gap-5 w-full mt-5 bg-gray-100">
-        <ProfileCard user={profileUser} />
+    <div className="bg-gray-100 min-h-screen">
+      {/* Navbar */}
+      <MainNav />
 
-        <div>
-          {/* Create Post */}
-          <CreatePost />
-          {/* Post Feed */}
-
-          {posts.map((post, index) => (
-            <PostCard key={index} post={post} />
-          ))}
+      {/* Main Container */}
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 flex flex-col lg:flex-row gap-6 py-6">
+        
+        {/* Left Sidebar: Profile */}
+        <div className="hidden lg:block w-full lg:w-1/4 sticky top-20">
+          <ProfileCard user={profileUser} />
         </div>
 
-        <div>
-          {/* Right Feed */}
-          <div className="hidden xl:block w-full">
-            <h2 className="text-xl font-semibold mb-4">People You May Know</h2>
-            <div className="bg-white p-4 rounded-lg shadow-md">
-              <p className="text-gray-600">
-                Suggestions based on your network.
-              </p>
-              {/* Add more suggestions here */}
-            </div>
+        {/* Main Feed */}
+        <div className="flex-1 flex flex-col gap-6">
+          {/* Create Post */}
+          <CreatePost />
+
+          {/* Posts */}
+          {posts.length === 0 ? (
+            <p className="text-center text-gray-500 mt-10">
+              No posts to show
+            </p>
+          ) : (
+            posts.map((post, index) => (
+              <PostCard key={index} post={post} />
+            ))
+          )}
+        </div>
+
+        {/* Right Sidebar: Suggestions */}
+        <div className="hidden xl:block w-1/4 sticky top-20 space-y-4">
+          <div className="bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition-shadow">
+            <h2 className="text-lg font-semibold mb-2">People You May Know</h2>
+            <p className="text-gray-600 text-sm">
+              Suggestions based on your network.
+            </p>
           </div>
+          {/* Add more suggestion cards here if needed */}
         </div>
       </div>
     </div>

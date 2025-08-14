@@ -3,7 +3,7 @@ services:
   backend:
     build:
       context: ./backend
-    container_name: linkifybackend
+    container_name: linkifybackendproj
     ports:
       - "3000:3000"
     env_file:
@@ -16,8 +16,8 @@ services:
     build:
       context:  "./LinkedIn Clone"
       args:
-        VITE_BACKEND_URL: "https://linkify-backend-goe4.onrender.com"
-    container_name: linkify-frontend
+        VITE_BACKEND_URL: "http://localhost:3000"
+    container_name: linkifyfrontendproj
     ports:
       - "80:80"
     depends_on:

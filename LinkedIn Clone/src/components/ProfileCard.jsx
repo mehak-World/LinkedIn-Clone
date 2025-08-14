@@ -11,7 +11,7 @@ const ProfileCard = ({ user }) => {
           alt="Cover"
         />}
         <div className="bg-gray-200 absolute top-10 left-10 w-16 h-16 flex justify-center items-center rounded-full">
-          {user?.profile?.profilePic ? <img className = "rounded-full" src = {user.profile.profilePic} />: <i className="text-3xl fa-solid fa-user text-gray-600"></i>}
+          {user?.profile?.profilePic ? <img className="w-full h-full object-cover rounded-full" src = {user.profile.profilePic} />: <i className="text-3xl fa-solid fa-user text-gray-600"></i>}
         </div>
 
         <h2 className="text-center text-xl font-bold mt-4">{user?.username}</h2>

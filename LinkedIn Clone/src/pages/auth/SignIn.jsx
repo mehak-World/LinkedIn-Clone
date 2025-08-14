@@ -1,4 +1,4 @@
-import { useState, useEffect, useContext } from "react";
+import { useState, useEffect } from "react";
 import HomeNav from "../../components/HomeNav";
 import { useNavigate, useParams } from "react-router-dom";
 import { ToastContainer, toast } from "react-toastify";
@@ -8,10 +8,8 @@ import GoogleAuth from "../../components/GoogleAuth";
 const SignIn = () => {
   const { initial } = useParams();
   const navigate = useNavigate();
-  // Create state variable to manage the sign in/sign up status
-  const [isSignUp, setIsSignUp] = useState(initial == "true");
+  const [isSignUp, setIsSignUp] = useState(initial === "true");
 
-  // State variables for email, name, and password
   const [email, setEmail] = useState("");
   const [name, setName] = useState("");
   const [password, setPassword] = useState("");
@@ -26,81 +24,101 @@ const SignIn = () => {
   };
 
   useEffect(() => {
-    setIsSignUp(initial == "true");
+    setIsSignUp(initial === "true");
   }, [initial]);
 
   return (
     <>
       <HomeNav />
-      <div className="w-[350px]  bg-gray-100 shadow-2xl relative mx-auto my-[8%] p-10">
-        <ToastContainer />
-        <h2 className="text-3xl">{isSignUp ? "Sign Up" : "Sign In"}</h2>
-        <form>
-          {isSignUp && (
-            <div className="my-4">
-              <label for="name">Full Name</label> <br />
-              <input
-                id="name"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                type="text"
-                className="w-[100%] border-2 rounded-lg p-2"
-              ></input>
-            </div>
-          )}
-          <div className="my-4">
-            <label for="email">Email</label> <br />
-            <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="w-[100%] border-2 rounded-lg p-2"
-            ></input>
-          </div>
-          <div>
-            <label for="password">Password</label> <br />
-            <input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="w-[100%] border-2 rounded-lg p-2"
-            ></input>
-          </div>
-          <button
-            className="p-3 my-5 bg-blue-700 text-white text-center rounded-lg w-full "
-            type="submit"
-            onClick={(e) => handleSignUp(e)}
-          >
+      <div className="flex justify-center items-center min-h-screen bg-gray-100 px-4 py-10">
+        <div className="w-full max-w-md bg-white shadow-2xl rounded-xl p-8 sm:p-10 pt-15">
+          <ToastContainer />
+          <h2 className="text-2xl sm:text-3xl font-bold mb-6 text-center">
             {isSignUp ? "Sign Up" : "Sign In"}
-          </button>
-        </form>
-        {!isSignUp && (
-          <p>
-            New to LinkedIn?{" "}
-            <span
-              className="text-blue-700 cursor-pointer"
-              onClick={() => setIsSignUp(!isSignUp)}
-            >
-              Join Now
-            </span>
-          </p>
-        )}
-        {isSignUp && (
-          <p>
-            Already have an account,{" "}
-            <span
-              className="text-blue-700 cursor-pointer"
-              onClick={() => setIsSignUp(!isSignUp)}
-            >
-              Sign In
-            </span>
-          </p>
-        )}
-        <hr></hr>
-        <br />
+          </h2>
+          <form onSubmit={handleSignUp} className="flex flex-col gap-4">
+            {isSignUp && (
+              <div>
+                <label htmlFor="name" className="block mb-1 font-medium">
+                  Full Name
+                </label>
+                <input
+                  id="name"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  type="text"
+                  className="w-full border-2 rounded-lg p-2 focus:outline-blue-500"
+                  required
+                />
+              </div>
+            )}
 
-        <p className="p-2 text-center">or</p>
-        <GoogleAuth />
+            <div>
+              <label htmlFor="email" className="block mb-1 font-medium">
+                Email
+              </label>
+              <input
+                id="email"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="w-full border-2 rounded-lg p-2 focus:outline-blue-500"
+                required
+              />
+            </div>
+
+            <div>
+              <label htmlFor="password" className="block mb-1 font-medium">
+                Password
+              </label>
+              <input
+                id="password"
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="w-full border-2 rounded-lg p-2 focus:outline-blue-500"
+                required
+              />
+            </div>
+
+            <button
+              type="submit"
+              className="w-full p-3 bg-blue-700 text-white rounded-lg font-medium mt-4 hover:bg-blue-800 transition"
+            >
+              {isSignUp ? "Sign Up" : "Sign In"}
+            </button>
+          </form>
+
+          <div className="text-center mt-4 text-sm">
+            {!isSignUp ? (
+              <p>
+                New to LinkedIn?{" "}
+                <span
+                  className="text-blue-700 cursor-pointer font-semibold"
+                  onClick={() => setIsSignUp(true)}
+                >
+                  Join Now
+                </span>
+              </p>
+            ) : (
+              <p>
+                Already have an account?{" "}
+                <span
+                  className="text-blue-700 cursor-pointer font-semibold"
+                  onClick={() => setIsSignUp(false)}
+                >
+                  Sign In
+                </span>
+              </p>
+            )}
+          </div>
+
+          <hr className="my-4" />
+          <p className="text-center text-gray-500 mb-4">or</p>
+          <div className="flex justify-center">
+            <GoogleAuth />
+          </div>
+        </div>
       </div>
     </>
   );

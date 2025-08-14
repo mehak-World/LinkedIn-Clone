@@ -1,6 +1,7 @@
 const express = require("express");
 const http = require("http"); 
 const cors = require("cors");
+const path = require("path");
 require("dotenv").config();
 const userRouter = require("./routes/user");
 const connect_db = require("./utils/db_setup");
@@ -44,9 +45,16 @@ app.get("/search-users", async (req, res) => {
   res.json(users);
 });
 
-
 const { initSocket } = require("./utils/socket.js");
 initSocket(server);
+
+// Serve React static files
+app.use(express.static(path.join(__dirname, "../LinkedIn Clone/dist")));
+
+// React routing fallback (only non-API requests)
+app.get(/^\/(?!auth|posts|profile|connections|messages|users).*/, (req, res) => {
+  res.sendFile(path.resolve(__dirname, "../LinkedIn Clone/dist", "index.html"));
+});
 
 // Server start
 const PORT = process.env.PORT || 3000;

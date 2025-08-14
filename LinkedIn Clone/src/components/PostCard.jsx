@@ -2,7 +2,7 @@ import { useState } from "react";
 import axios from "axios";
 import Comment from "./Comment.jsx";
 import { Link } from "react-router-dom";
-import parse from 'html-react-parser';
+import parse from "html-react-parser";
 import { backend_url } from "../utils/app.js";
 
 const PostCard = ({ post }) => {
@@ -10,70 +10,79 @@ const PostCard = ({ post }) => {
   const [increaseLike, setIncreaseLike] = useState(false);
   const [comment, setComment] = useState("");
   const user = JSON.parse(localStorage.getItem("user"));
-  console.log(user);
   const [peopleLiked, setPeopleLiked] = useState(post.peopleLiked || []);
   const [comments, setComments] = useState(post.comments || []);
 
   const handleSubmit = async () => {
+    if (!comment.trim()) return;
+
     setComments([...comments, { content: comment, author: user }]);
     setComment("");
 
-    await axios.post(`${backend_url}/posts/comment`, {
-      postId: post._id,
-      content: comment,
-      author: user._id,
-    });
+    try {
+      await axios.post(`${backend_url}/posts/comment`, {
+        postId: post._id,
+        content: comment,
+        author: user._id,
+      });
+    } catch (err) {
+      console.error("Failed to add comment:", err);
+    }
   };
 
   const handleLikes = async () => {
     let new_peopleLiked = peopleLiked;
 
     if (peopleLiked.includes(user._id)) {
-      // User has already liked the post, so we remove their like
       setIncreaseLike(false);
-      setPeopleLiked(peopleLiked.filter((id) => id !== user._id));
       new_peopleLiked = new_peopleLiked.filter((id) => id !== user._id);
+      setPeopleLiked(new_peopleLiked);
     } else {
-      // User has not liked the post, so we add their like
       setIncreaseLike(true);
-      setPeopleLiked([...peopleLiked, user._id]);
       new_peopleLiked = [...peopleLiked, user._id];
+      setPeopleLiked(new_peopleLiked);
     }
 
-    // Send update to backend
     try {
       await axios.post(`${backend_url}/posts/like`, {
         postId: post._id,
         new_peopleLiked,
       });
-    } catch (error) {
-      console.error("Failed to update likes", error);
+    } catch (err) {
+      console.error("Failed to update likes:", err);
     }
   };
 
   return (
-    <div className="p-2 w-130 bg-white rounded-lg shadow-md mb-4">
-      <Link to={`/profile/${post.author._id}`}>
-        <h4>{post?.author?.username}</h4>
-         <h5>{post?.author?.profile?.profileTitle}</h5>
+    <div className="w-full bg-white rounded-lg shadow-md p-4 sm:p-6 mb-6">
+      {/* Author Info */}
+      <Link to={`/profile/${post.author._id}`} className="block mb-2">
+        <h4 className="font-semibold text-gray-800">{post.author.username}</h4>
+        <h5 className="text-gray-500 text-sm">{post.author.profile?.profileTitle}</h5>
       </Link>
-      <p className="text-gray-700">{post.title}</p>
-      <p className="text-gray-500">{parse(post.content)}</p>
+
+      {/* Post Content */}
+      <p className="text-gray-700 mt-2">{post.title}</p>
+      <div className="text-gray-500 mt-1">{parse(post.content)}</div>
+
+      {/* Post Image */}
       {post.images && post.images.length > 0 && (
-        <div className="my-2 flex justify-center">
+        <div className="my-3 w-full">
           <div className="w-full aspect-video overflow-hidden rounded-lg">
             <img
-              src={post?.images[0]?.url}
+              src={post.images[0].url}
               alt="post"
               className="w-full h-full object-cover"
             />
           </div>
         </div>
       )}
-      <div className="flex justify-between items-center mt-2 mx-5">
-        <div className="flex gap-1 items-center justify-center">
+
+      {/* Like & Comment Buttons */}
+      <div className="flex justify-between items-center mt-3">
+        <div className="flex gap-2 items-center">
           <i
-            className=" cursor-pointer text-2xl fa-solid fa-thumbs-up "
+            className="cursor-pointer fa-solid fa-thumbs-up text-xl"
             style={{ color: increaseLike ? "gray" : "" }}
             onClick={handleLikes}
           ></i>
@@ -81,15 +90,15 @@ const PostCard = ({ post }) => {
             <span className="text-gray-600">{peopleLiked.length}</span>
           )}
         </div>
-
         <i
-          className=" cursor-pointer text-2xl fa-solid fa-comment"
+          className="cursor-pointer fa-solid fa-comment text-xl"
           onClick={() => setShowComments(!showComments)}
         ></i>
       </div>
+
       {/* Comments Section */}
       {showComments && (
-        <div>
+        <div className="mt-3">
           <input
             type="text"
             placeholder="Add a comment..."
@@ -103,10 +112,11 @@ const PostCard = ({ post }) => {
           >
             Post
           </button>
+
           {comments.length > 0 && (
-            <div className="mt-4">
-              {comments.map((comment, index) => (
-                <Comment key={index} comment={comment} />
+            <div className="mt-4 space-y-2">
+              {comments.map((cmt, index) => (
+                <Comment key={index} comment={cmt} />
               ))}
             </div>
           )}

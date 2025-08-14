@@ -3,6 +3,7 @@ import MainNav from '../../components/MainNav';
 import axios from 'axios';
 import ConnectionCard from './ConnectionCard';
 import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 import { backend_url } from '../../utils/app';
 
 const MyNetwork = () => {
@@ -13,45 +14,61 @@ const MyNetwork = () => {
 
   useEffect(() => {
     const getConnections = async () => {
-      const res = await axios.get(`${backend_url}/connections/` + user?._id);
-      if (res) {
-        setConnections(res.data.connections);
-        setPending(res.data.pendingRequests);
+      try {
+        const res = await axios.get(`${backend_url}/connections/${user?._id}`);
+        if (res) {
+          setConnections(res.data.connections);
+          setPending(res.data.pendingRequests);
+        }
+      } catch (err) {
+        console.error(err);
       }
     };
 
-    if(user){
-        getConnections();
-    }
-    
-  }, [active]);
+    if (user) getConnections();
+  }, [active, user]);
 
   const handleAccept = async (id) => {
-    const res = await axios.post(`${backend_url}/connections/accept` , {user_id: user?._id, connection_id: id });
+    try {
+      const res = await axios.post(`${backend_url}/connections/accept`, {
+        user_id: user?._id,
+        connection_id: id,
+      });
       if (res) {
         setConnections(res.data.connections);
         setPending(res.data.pendingRequests);
-        const notify = () => toast("Connection successfully added");
-        notify()
+        toast.success("Connection successfully added");
       }
-  }
-
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to accept connection");
+    }
+  };
 
   const handleReject = async (id) => {
-    const res = await axios.post(`${backend_url}/connections/reject` , {user_id: user?._id, connection_id: id });
+    try {
+      const res = await axios.post(`${backend_url}/connections/reject`, {
+        user_id: user?._id,
+        connection_id: id,
+      });
       if (res) {
         setConnections(res.data.connections);
         setPending(res.data.pendingRequests);
+        toast.info("Connection rejected");
       }
-  }
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to reject connection");
+    }
+  };
 
   return (
     <>
       <MainNav />
-      <ToastContainer />
-      <div className="px-5 xl:px-48 py-10 w-full min-h-screen">
+      <ToastContainer position="top-right" autoClose={3000} />
+      <div className="px-4 sm:px-6 lg:px-16 xl:px-48 py-10 w-full min-h-screen bg-gray-50">
         {/* Header */}
-        <div className="flex justify-between items-center bg-gray-100 p-6 rounded-2xl shadow-md">
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center bg-gray-100 p-6 rounded-2xl shadow-md gap-4 md:gap-0">
           <h1 className="text-2xl font-semibold text-gray-800">
             {active === "friends" ? "Catch Up with Friends" : "Pending Requests"}
           </h1>
@@ -76,18 +93,34 @@ const MyNetwork = () => {
         </div>
 
         {/* Content */}
-        <div className="mt-10 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="mt-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {active === "friends" &&
-            connections?.map((connection) => (
-             
-                <ConnectionCard connection = {connection} key = {connection?._id} displayBtns={false} />
-                
-            ))}
+            connections?.length > 0 ? (
+            connections.map((connection) => (
+              <ConnectionCard
+                connection={connection}
+                key={connection?._id}
+                displayBtns={false}
+              />
+            ))
+          ) : active === "friends" ? (
+            <p className="text-gray-500 col-span-full text-center">No friends found</p>
+          ) : null}
 
           {active === "pending" &&
-            pending?.map((connection) => (
-             <ConnectionCard connection = {connection} key = {connection?._id} displayBtns={true} handleAccept = {handleAccept} handleReject={handleReject}/>
-            ))}
+            pending?.length > 0 ? (
+            pending.map((connection) => (
+              <ConnectionCard
+                connection={connection}
+                key={connection?._id}
+                displayBtns={true}
+                handleAccept={handleAccept}
+                handleReject={handleReject}
+              />
+            ))
+          ) : active === "pending" ? (
+            <p className="text-gray-500 col-span-full text-center">No pending requests</p>
+          ) : null}
         </div>
       </div>
     </>
